@@ -1,0 +1,158 @@
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x", "linux-musl-arm64-openssl-3.0.x", "debian-openssl-1.1.x", "debian-openssl-3.0.x"]
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// Auth.js required models
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// Core domain models
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+  passwordHash  String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  accounts    Account[]
+  sessions    Session[]
+  memberships Membership[]
+}
+
+model Workspace {
+  id        String   @id @default(cuid())
+  name      String
+  slug      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  memberships Membership[]
+  mailDomains MailDomain[]
+}
+
+model Membership {
+  id          String   @id @default(cuid())
+  userId      String
+  workspaceId String
+  role        String   @default("member")
+  createdAt   DateTime @default(now())
+
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, workspaceId])
+}
+
+// Mail infrastructure models
+
+model MailDomain {
+  id             String    @id @default(cuid())
+  workspaceId    String
+  domain         String    @unique
+  status         String    @default("pending")
+  resendDomainId String? // Legacy name — actually stores Forward Email domain ID. Not renamed to avoid migration.
+  verifiedAt     DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  workspace Workspace         @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  aliases   MailAlias[]
+  messages  ReceivedMessage[]
+}
+
+model MailAlias {
+  id           String   @id @default(cuid())
+  mailDomainId String
+  address      String   @unique
+  label        String?
+  createdAt    DateTime @default(now())
+
+  mailDomain MailDomain        @relation(fields: [mailDomainId], references: [id], onDelete: Cascade)
+  messages   ReceivedMessage[]
+}
+
+model ReceivedMessage {
+  id           String   @id @default(cuid())
+  mailDomainId String
+  mailAliasId  String?
+  fromName     String?
+  fromEmail    String
+  toEmail      String
+  subject      String
+  bodyText     String?
+  bodyHtml     String?
+  isRead       Boolean  @default(false)
+  isArchived   Boolean  @default(false)
+  receivedAt   DateTime @default(now())
+
+  mailDomain    MailDomain     @relation(fields: [mailDomainId], references: [id], onDelete: Cascade)
+  mailAlias     MailAlias?     @relation(fields: [mailAliasId], references: [id])
+  otpExtraction OtpExtraction?
+
+  @@index([mailDomainId, isArchived, receivedAt(sort: Desc)])
+}
+
+model OtpExtraction {
+  id                String   @id @default(cuid())
+  receivedMessageId String   @unique
+  otpCode           String?
+  confidence        String?
+  extractedAt       DateTime @default(now())
+
+  receivedMessage ReceivedMessage @relation(fields: [receivedMessageId], references: [id], onDelete: Cascade)
+}
+
+model WebhookEventLog {
+  id          String    @id @default(cuid())
+  source      String    @default("resend")
+  eventType   String
+  payload     String
+  processedAt DateTime?
+  error       String?
+  receivedAt  DateTime  @default(now())
+
+  @@index([source, receivedAt(sort: Desc)])
+}

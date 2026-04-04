@@ -1,0 +1,10 @@
+{
+  "headers": [
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        { "key": "x-robots-tag", "value": "none" }
+      ]
+    }
+  ]
+}
