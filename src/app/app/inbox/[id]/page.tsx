@@ -167,12 +167,10 @@ export default async function MessageDetailPage({ params }: { params: Promise<{ 
                 {message.bodyText}
               </div>
             ) : message.bodyHtml ? (
-              <iframe
-                srcDoc={message.bodyHtml}
-                sandbox="allow-same-origin"
-                title="Email content"
-                className="w-full border-0 min-h-[400px]"
+              <div
+                className="email-html-body w-full overflow-auto"
                 style={{ background: '#fff', borderRadius: '8px' }}
+                dangerouslySetInnerHTML={{ __html: message.bodyHtml }}
               />
             ) : (
               <div

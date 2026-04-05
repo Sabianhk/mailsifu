@@ -357,19 +357,10 @@ export function InboxView({ messages, activeMessage: initialActiveMessage, hasEx
                   {activeMessage.bodyText}
                 </div>
               ) : activeMessage.bodyHtml ? (
-                <iframe
-                  srcDoc={activeMessage.bodyHtml}
-                  sandbox="allow-same-origin"
-                  title="Email content"
-                  className="w-full border-0 min-h-[400px]"
+                <div
+                  className="email-html-body w-full overflow-auto"
                   style={{ background: '#fff', borderRadius: '8px' }}
-                  onLoad={(e) => {
-                    const iframe = e.currentTarget
-                    const doc = iframe.contentDocument
-                    if (doc?.body) {
-                      iframe.style.height = doc.body.scrollHeight + 32 + 'px'
-                    }
-                  }}
+                  dangerouslySetInnerHTML={{ __html: activeMessage.bodyHtml }}
                 />
               ) : (
                 <div
