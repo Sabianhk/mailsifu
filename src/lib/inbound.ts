@@ -125,7 +125,7 @@ async function storeInboundMessage({
   })
 
   // Extract OTP and store result
-  const { otpCode, confidence } = extractOtp(message.subject, message.bodyText)
+  const { otpCode, confidence } = extractOtp(message.subject, message.bodyText, message.bodyHtml)
   if (otpCode) {
     await prisma.otpExtraction.create({
       data: { receivedMessageId: message.id, otpCode, confidence },

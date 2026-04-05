@@ -315,12 +315,11 @@ export default function LandingPage() {
       {/* Nav */}
       <nav className="relative z-20 flex items-center justify-between px-8 py-5 max-w-5xl mx-auto">
         <div className="flex items-center gap-2.5">
-          <div
-            className="w-7 h-7 rounded-lg flex items-center justify-center text-white text-xs font-bold"
-            style={{ background: 'linear-gradient(145deg, #E8623A, #c94b25)' }}
-          >
-            M
-          </div>
+          <img
+            src="/images/logo-icon.png"
+            alt="MailSifu"
+            className="w-7 h-7 rounded-lg"
+          />
           <span
             className="text-base font-semibold tracking-tight"
             style={{ fontFamily: 'var(--font-manrope)', color: '#1C1410' }}
@@ -530,43 +529,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Editorial image break */}
-      <div className="max-w-5xl mx-auto px-8 relative">
-        <div
-          className="relative rounded-2xl overflow-hidden"
-          style={{ height: '280px', boxShadow: '0 8px 40px rgba(28, 20, 16, 0.08)' }}
-        >
-          <img
-            src="/images/features-bg.webp"
-            alt=""
-            className="w-full h-full object-cover"
-            style={{ filter: 'brightness(1.05) saturate(0.9)' }}
-          />
-          <div
-            className="absolute inset-0"
-            style={{ background: 'linear-gradient(to right, rgba(253,248,245,0.7) 0%, rgba(253,248,245,0.2) 40%, rgba(253,248,245,0.2) 60%, rgba(253,248,245,0.7) 100%)' }}
-          />
-          <div className="absolute inset-0 flex items-center justify-center">
-            <motion.p
-              initial={{ opacity: 0, y: 8 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6 }}
-              className="text-lg sm:text-xl md:text-2xl text-center px-6"
-              style={{
-                fontFamily: 'var(--font-newsreader)',
-                fontStyle: 'italic',
-                color: '#1C1410',
-                fontWeight: 400,
-                textShadow: '0 1px 20px rgba(253,248,245,0.8)',
-              }}
-            >
-              Every code finds its way home.
-            </motion.p>
-          </div>
-        </div>
-      </div>
-
       {/* Features */}
       <section className="max-w-5xl mx-auto px-8 py-12">
         <div className="grid md:grid-cols-3 gap-6">
@@ -639,35 +601,15 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Editorial image strip before footer */}
-      <div className="max-w-5xl mx-auto px-8 mb-4">
-        <div
-          className="relative rounded-2xl overflow-hidden"
-          style={{ height: '200px', boxShadow: '0 4px 24px rgba(28, 20, 16, 0.06)' }}
-        >
-          <img
-            src="/images/hero-bg.webp"
-            alt=""
-            className="w-full h-full object-cover"
-            style={{ filter: 'brightness(1.08) saturate(0.85)' }}
-          />
-          <div
-            className="absolute inset-0"
-            style={{ background: 'linear-gradient(to bottom, rgba(253,248,245,0.4) 0%, rgba(253,248,245,0.15) 50%, rgba(253,248,245,0.5) 100%)' }}
-          />
-        </div>
-      </div>
-
       {/* Footer */}
       <footer className="max-w-5xl mx-auto px-8 py-10" style={{ borderTop: '1px solid rgba(238, 184, 152, 0.15)' }}>
         <div className="flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
-            <div
-              className="w-5 h-5 rounded flex items-center justify-center text-white text-[9px] font-bold"
-              style={{ background: 'linear-gradient(145deg, #E8623A, #c94b25)' }}
-            >
-              M
-            </div>
+            <img
+              src="/images/logo-icon.png"
+              alt="MailSifu"
+              className="w-5 h-5 rounded"
+            />
             <span
               className="font-semibold text-sm"
               style={{ fontFamily: 'var(--font-manrope)', color: '#1C1410' }}
