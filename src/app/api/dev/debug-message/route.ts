@@ -1,20 +1,17 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { NextResponse } from 'next/server'
 
-export async function GET(req: NextRequest) {
-  const subject = req.nextUrl.searchParams.get('subject') || 'TikTok'
-
+export async function GET() {
   try {
+    // Dynamic import to avoid module-level env check
+    const { prisma } = await import('@/lib/prisma')
+
     const msg = await prisma.receivedMessage.findFirst({
-      where: { subject: { contains: subject } },
+      where: { subject: { contains: 'TikTok' } },
       select: {
         id: true,
         subject: true,
         bodyText: true,
         bodyHtml: true,
-        fromEmail: true,
-        toEmail: true,
-        receivedAt: true,
       },
       orderBy: { receivedAt: 'desc' },
     })
@@ -26,8 +23,6 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({
       id: msg.id,
       subject: msg.subject,
-      fromEmail: msg.fromEmail,
-      toEmail: msg.toEmail,
       bodyTextIsNull: msg.bodyText === null,
       bodyTextLength: msg.bodyText?.length ?? null,
       bodyTextTrimmedLength: msg.bodyText?.trim().length ?? null,
@@ -35,8 +30,12 @@ export async function GET(req: NextRequest) {
       bodyHtmlIsNull: msg.bodyHtml === null,
       bodyHtmlLength: msg.bodyHtml?.length ?? null,
       bodyHtmlPreview: msg.bodyHtml?.substring(0, 500) ?? null,
+      hasDbUrl: !!process.env.DATABASE_URL,
     })
   } catch (err) {
-    return NextResponse.json({ error: String(err) }, { status: 500 })
+    return NextResponse.json({
+      error: String(err),
+      hasDbUrl: !!process.env.DATABASE_URL,
+    }, { status: 500 })
   }
 }
