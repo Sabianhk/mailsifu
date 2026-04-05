@@ -1,17 +1,23 @@
 'use client'
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import { signOut } from 'next-auth/react'
 import { useEffect, useState } from 'react'
 
 interface SidebarProps {
-  activePage: 'inbox' | 'domains' | 'users'
   userName: string
   userEmail: string
   isAdmin?: boolean
 }
 
-export function Sidebar({ activePage, userName, userEmail, isAdmin }: SidebarProps) {
+export function Sidebar({ userName, userEmail, isAdmin }: SidebarProps) {
   const [isOpen, setIsOpen] = useState(false)
+  const pathname = usePathname()
+  const activePage = pathname.startsWith('/app/admin/users')
+    ? 'users'
+    : pathname.startsWith('/app/domains')
+      ? 'domains'
+      : 'inbox'
 
   useEffect(() => {
     const handler = () => setIsOpen((o) => !o)

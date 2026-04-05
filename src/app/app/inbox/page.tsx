@@ -1,7 +1,6 @@
 import { after } from 'next/server'
 import { unstable_cache } from 'next/cache'
 import { prisma } from '@/lib/prisma'
-import { Sidebar } from '@/components/Sidebar'
 import { TopBar } from '@/components/TopBar'
 import { getSession, getMembership } from '@/lib/workspace'
 import { InboxView } from './InboxView'
@@ -115,24 +114,21 @@ export default async function InboxPage({
   const serializedActive = activeMessage ? serialize(activeMessage) : null
 
   return (
-    <>
-      <Sidebar activePage="inbox" userName={userName} userEmail={session?.user?.email ?? ''} isAdmin={isAdmin} />
-      <main className="flex-1 flex flex-col overflow-hidden bg-surface">
-        <TopBar
-          breadcrumb={['Inbox']}
-          showSearch={false}
-          userName={userName}
-        />
-        <InboxView
-          messages={serializedMessages}
-          activeMessage={serializedActive}
-          hasExplicitSelection={!!selectedId}
-          domains={domainOptions}
-          aliases={aliasOptions}
-          activeDomain={filterDomain ?? null}
-          activeAlias={filterAlias ?? null}
-        />
-      </main>
-    </>
+    <main className="flex-1 flex flex-col overflow-hidden bg-surface">
+      <TopBar
+        breadcrumb={['Inbox']}
+        showSearch={false}
+        userName={userName}
+      />
+      <InboxView
+        messages={serializedMessages}
+        activeMessage={serializedActive}
+        hasExplicitSelection={!!selectedId}
+        domains={domainOptions}
+        aliases={aliasOptions}
+        activeDomain={filterDomain ?? null}
+        activeAlias={filterAlias ?? null}
+      />
+    </main>
   )
 }

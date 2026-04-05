@@ -1,7 +1,6 @@
 import { redirect } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 import { getSession, getMembership } from '@/lib/workspace'
-import { Sidebar } from '@/components/Sidebar'
 import { TopBar } from '@/components/TopBar'
 import { CreateUserForm } from './CreateUserForm'
 
@@ -24,9 +23,7 @@ export default async function AdminUsersPage() {
   })
 
   return (
-    <>
-      <Sidebar activePage="users" userName={userName} userEmail={session?.user?.email ?? ''} isAdmin />
-      <main className="flex-1 flex flex-col overflow-hidden" style={{ background: '#fcf9f6' }}>
+    <main className="flex-1 flex flex-col overflow-hidden" style={{ background: '#fcf9f6' }}>
         <TopBar breadcrumb={['Admin', 'Users']} showSearch={false} userName={userName} />
 
         <section className="flex-1 overflow-y-auto px-4 md:px-10 py-6 md:py-12">
@@ -112,6 +109,5 @@ export default async function AdminUsersPage() {
           </div>
         </section>
       </main>
-    </>
   )
 }

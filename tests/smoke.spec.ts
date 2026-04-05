@@ -2,9 +2,9 @@ import { test, expect, Page, Browser, BrowserContext } from '@playwright/test';
 import * as fs from 'fs';
 import * as path from 'path';
 
-const BASE_URL = 'https://mailsifu.com';
+const BASE_URL = process.env.BASE_URL || 'https://mailsifu.com';
 const SCREENSHOT_DIR = path.join(__dirname, '..', 'test-screenshots');
-const CREDS = { email: 'stanley@lumislinks.com', password: 'Lumis!Admin#2748' };
+const CREDS = { email: 'happyendoftheworld00@gmail.com', password: 'Default123.' };
 const STORAGE_STATE_PATH = path.join(__dirname, '..', 'test-screenshots', 'auth-state.json');
 
 function screenshotPath(name: string): string {

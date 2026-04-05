@@ -29,3 +29,4 @@ skills-lock.json
 
 # Reference/docs (local only)
 reference/
+.env*.local

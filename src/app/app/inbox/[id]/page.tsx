@@ -3,7 +3,6 @@ import { after } from 'next/server'
 import Link from 'next/link'
 import { prisma } from '@/lib/prisma'
 import { getSession, getMembership } from '@/lib/workspace'
-import { Sidebar } from '@/components/Sidebar'
 import { TopBar } from '@/components/TopBar'
 import { archiveMessage } from '../actions'
 
@@ -55,7 +54,6 @@ export default async function MessageDetailPage({ params }: { params: Promise<{ 
 
   return (
     <>
-      <Sidebar activePage="inbox" userName={userName} userEmail={session?.user?.email ?? ''} />
       <main className="flex-1 flex flex-col overflow-hidden" style={{ background: '#fdf8f5' }}>
         <TopBar breadcrumb={['Inbox', message.subject]} userName={userName} />
 

@@ -1,6 +1,5 @@
 import Link from 'next/link'
 import { prisma } from '@/lib/prisma'
-import { Sidebar } from '@/components/Sidebar'
 import { TopBar } from '@/components/TopBar'
 import { getSession, getMembership } from '@/lib/workspace'
 import { AddDomainForm } from './AddDomainForm'
@@ -26,8 +25,6 @@ export default async function DomainsPage() {
 
   const userName = session?.user?.name ?? session?.user?.email ?? 'User'
 
-  const isAdmin = membership?.role === 'owner'
-
   const domains = membership
     ? await prisma.mailDomain.findMany({
         where: { workspaceId: membership.workspaceId },
@@ -37,9 +34,7 @@ export default async function DomainsPage() {
     : []
 
   return (
-    <>
-      <Sidebar activePage="domains" userName={userName} userEmail={session?.user?.email ?? ''} isAdmin={isAdmin} />
-      <main className="flex-1 flex flex-col overflow-hidden" style={{ background: '#fcf9f6' }}>
+    <main className="flex-1 flex flex-col overflow-hidden" style={{ background: '#fcf9f6' }}>
         <TopBar breadcrumb={['Workspace', 'Domains']} showSearch searchPlaceholder="Search domains…" userName={userName} />
 
         <section className="flex-1 overflow-y-auto px-4 md:px-10 py-6 md:py-12">
@@ -166,6 +161,5 @@ export default async function DomainsPage() {
           </div>
         </section>
       </main>
-    </>
   )
 }

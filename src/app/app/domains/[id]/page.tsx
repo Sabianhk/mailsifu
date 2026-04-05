@@ -2,7 +2,6 @@ import { redirect, notFound } from 'next/navigation'
 import Link from 'next/link'
 import { prisma } from '@/lib/prisma'
 import { getSession, getMembership } from '@/lib/workspace'
-import { Sidebar } from '@/components/Sidebar'
 import { TopBar } from '@/components/TopBar'
 import { VerifyButton } from './VerifyButton'
 import { AliasSection } from './AliasSection'
@@ -130,7 +129,6 @@ export default async function DomainDetailPage({ params }: { params: Promise<{ i
 
   return (
     <>
-      <Sidebar activePage="domains" userName={userName} userEmail={session?.user?.email ?? ''} />
       <main className="flex-1 flex flex-col overflow-hidden bg-surface">
         <TopBar
           breadcrumb={['Workspace', 'Domains', domain.domain]}
