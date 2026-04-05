@@ -158,13 +158,30 @@ export default async function MessageDetailPage({ params }: { params: Promise<{ 
             {/* Divider */}
             <div className="mb-8" style={{ borderTop: '0.5px solid rgba(238,184,152,0.25)' }} />
 
-            {/* Body — always render as plain text to prevent XSS from email HTML */}
-            <div
-              className="text-[14px] leading-[1.7] whitespace-pre-line"
-              style={{ color: '#1C1410', fontFamily: 'var(--font-body)' }}
-            >
-              {message.bodyText ?? '(No content)'}
-            </div>
+            {/* Body — plain text preferred, sandboxed iframe for HTML-only emails */}
+            {message.bodyText ? (
+              <div
+                className="text-[14px] leading-[1.7] whitespace-pre-line"
+                style={{ color: '#1C1410', fontFamily: 'var(--font-body)' }}
+              >
+                {message.bodyText}
+              </div>
+            ) : message.bodyHtml ? (
+              <iframe
+                srcDoc={message.bodyHtml}
+                sandbox=""
+                title="Email content"
+                className="w-full border-0 min-h-[400px]"
+                style={{ background: '#fff', borderRadius: '8px' }}
+              />
+            ) : (
+              <div
+                className="text-[14px] leading-[1.7]"
+                style={{ color: '#695950', fontFamily: 'var(--font-body)' }}
+              >
+                (No content)
+              </div>
+            )}
 
             {/* Actions */}
             <div className="mt-12 pt-8 flex gap-3" style={{ borderTop: '0.5px solid rgba(238,184,152,0.2)' }}>

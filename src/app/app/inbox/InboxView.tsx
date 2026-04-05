@@ -15,6 +15,7 @@ interface Message {
   toEmail: string
   subject: string
   bodyText: string | null
+  bodyHtml: string | null
   receivedAt: string
   isRead: boolean
   isArchived: boolean
@@ -212,7 +213,7 @@ export function InboxView({ messages, activeMessage: initialActiveMessage, hasEx
                   className="text-[12px] leading-relaxed line-clamp-2"
                   style={{ color: '#8b726a', fontFamily: 'var(--font-manrope)' }}
                 >
-                  {msg.bodyText?.slice(0, 120) ?? ''}
+                  {msg.bodyText?.slice(0, 120) ?? (msg.bodyHtml ? '(HTML email)' : '')}
                 </p>
                 {msg.otpExtraction?.otpCode && (
                   <span
@@ -348,12 +349,36 @@ export function InboxView({ messages, activeMessage: initialActiveMessage, hasEx
                 </div>
               </div>
 
-              <div
-                className="text-[14px] leading-[1.7] whitespace-pre-line break-words"
-                style={{ color: '#1c1c1a', fontFamily: 'var(--font-manrope)' }}
-              >
-                {activeMessage.bodyText ?? '(No text content)'}
-              </div>
+              {activeMessage.bodyText ? (
+                <div
+                  className="text-[14px] leading-[1.7] whitespace-pre-line break-words"
+                  style={{ color: '#1c1c1a', fontFamily: 'var(--font-manrope)' }}
+                >
+                  {activeMessage.bodyText}
+                </div>
+              ) : activeMessage.bodyHtml ? (
+                <iframe
+                  srcDoc={activeMessage.bodyHtml}
+                  sandbox=""
+                  title="Email content"
+                  className="w-full border-0 min-h-[400px]"
+                  style={{ background: '#fff', borderRadius: '8px' }}
+                  onLoad={(e) => {
+                    const iframe = e.currentTarget
+                    const doc = iframe.contentDocument
+                    if (doc?.body) {
+                      iframe.style.height = doc.body.scrollHeight + 32 + 'px'
+                    }
+                  }}
+                />
+              ) : (
+                <div
+                  className="text-[14px] leading-[1.7]"
+                  style={{ color: '#8b726a', fontFamily: 'var(--font-manrope)' }}
+                >
+                  (No content)
+                </div>
+              )}
             </div>
           </div>
         </section>

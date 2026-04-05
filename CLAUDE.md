@@ -7,19 +7,19 @@ Internal OTP-focused inbox for a small team (<10 users). Receiving OTP emails vi
 - Next.js 15 + TypeScript + Tailwind CSS 4 + Prisma 5
 - Auth.js 5 beta (credentials, JWT strategy)
 - Supabase PostgreSQL (pooler on aws-0-ap-southeast-1)
-- Forward Email for inbound email (primary), Resend as secondary
-- Hostinger for hosting (standalone output)
+- Forward Email for inbound email (SMTP provider)
+- Vercel for hosting
 
 ## Key Domains
 - `staging.mailsifu.com` — app UI
-- `rx.mailsifu.com` — receiving domain (Resend)
+- `rx.mailsifu.com` — receiving domain (Forward Email)
 
 ## Architecture Decisions
 - NO full mail server — just inbox product + OTP extraction
 - Auth: JWT strategy with credentials provider (email/password, bcrypt)
 - DB: Supabase PostgreSQL, Prisma ORM (pooler port 6543, direct port 5432)
 - Inbound: Forward Email webhook → `/api/webhooks/forwardemail` → ReceivedMessage + OtpExtraction
-- Inbound (legacy): Resend webhook → `/api/webhooks/resend` → same pipeline
+- Inbound (legacy): Resend webhook → `/api/webhooks/resend` → same pipeline (deprecated)
 
 ## PRD Phases
 1. ✅ App Foundation — Auth.js, protected routes, user/workspace models
