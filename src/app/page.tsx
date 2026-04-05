@@ -342,7 +342,7 @@ export default function LandingPage() {
           One oversized OTP code as the dramatic centerpiece.
           Signal ribbons converge. Ambient particles drift.
          ════════════════════════════════════════════════════════ */}
-      <section className="relative max-w-6xl mx-auto px-6 pt-12 sm:pt-20 pb-24 sm:pb-32 overflow-hidden">
+      <section className="relative max-w-6xl mx-auto px-6 pt-12 sm:pt-20 pb-12 sm:pb-16 overflow-hidden">
         {/* Atmospheric background layers */}
         <div className="absolute inset-0 -top-40 -bottom-20 overflow-hidden pointer-events-none" aria-hidden="true">
           {/* Primary warm radiance — large, centered, very soft */}
@@ -394,7 +394,7 @@ export default function LandingPage() {
         <AmbientParticles />
 
         {/* ── Top copy — minimal, confident ── */}
-        <div className="relative z-10 text-center max-w-2xl mx-auto mb-10 sm:mb-14">
+        <div className="relative z-10 text-center max-w-2xl mx-auto mb-6 sm:mb-8">
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -431,7 +431,7 @@ export default function LandingPage() {
         </div>
 
         {/* ══ THE CENTERPIECE — Oversized OTP Code ══ */}
-        <div className="relative z-10 flex justify-center items-center min-h-[140px] sm:min-h-[200px] md:min-h-[280px] mb-10 sm:mb-14">
+        <div className="relative z-10 flex justify-center items-center min-h-[120px] sm:min-h-[160px] md:min-h-[220px] mb-8 sm:mb-10">
           {/* Signal ribbons from services — flanking the code */}
           <SignalRibbon
             label="auth@stripe.com"
@@ -543,7 +543,7 @@ export default function LandingPage() {
       </div>
 
       {/* Features */}
-      <section className="max-w-5xl mx-auto px-8 py-20">
+      <section className="max-w-5xl mx-auto px-8 py-12">
         <div className="grid md:grid-cols-3 gap-6">
           {[
             {
