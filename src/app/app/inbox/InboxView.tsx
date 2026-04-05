@@ -349,7 +349,7 @@ export function InboxView({ messages, activeMessage: initialActiveMessage, hasEx
                 </div>
               </div>
 
-              {activeMessage.bodyText ? (
+              {activeMessage.bodyText?.trim() ? (
                 <div
                   className="text-[14px] leading-[1.7] whitespace-pre-line break-words"
                   style={{ color: '#1c1c1a', fontFamily: 'var(--font-manrope)' }}
@@ -359,7 +359,7 @@ export function InboxView({ messages, activeMessage: initialActiveMessage, hasEx
               ) : activeMessage.bodyHtml ? (
                 <iframe
                   srcDoc={activeMessage.bodyHtml}
-                  sandbox=""
+                  sandbox="allow-same-origin"
                   title="Email content"
                   className="w-full border-0 min-h-[400px]"
                   style={{ background: '#fff', borderRadius: '8px' }}

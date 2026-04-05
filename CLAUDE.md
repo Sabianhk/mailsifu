@@ -11,7 +11,7 @@ Internal OTP-focused inbox for a small team (<10 users). Receiving OTP emails vi
 - Vercel for hosting
 
 ## Key Domains
-- `staging.mailsifu.com` — app UI
+- `mailsifu.com` — production app UI (Vercel)
 - `rx.mailsifu.com` — receiving domain (Forward Email)
 
 ## Architecture Decisions

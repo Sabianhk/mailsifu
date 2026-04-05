@@ -159,7 +159,7 @@ export default async function MessageDetailPage({ params }: { params: Promise<{ 
             <div className="mb-8" style={{ borderTop: '0.5px solid rgba(238,184,152,0.25)' }} />
 
             {/* Body — plain text preferred, sandboxed iframe for HTML-only emails */}
-            {message.bodyText ? (
+            {message.bodyText?.trim() ? (
               <div
                 className="text-[14px] leading-[1.7] whitespace-pre-line"
                 style={{ color: '#1C1410', fontFamily: 'var(--font-body)' }}
@@ -169,7 +169,7 @@ export default async function MessageDetailPage({ params }: { params: Promise<{ 
             ) : message.bodyHtml ? (
               <iframe
                 srcDoc={message.bodyHtml}
-                sandbox=""
+                sandbox="allow-same-origin"
                 title="Email content"
                 className="w-full border-0 min-h-[400px]"
                 style={{ background: '#fff', borderRadius: '8px' }}
