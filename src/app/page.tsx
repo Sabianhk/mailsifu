@@ -530,16 +530,41 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Accent divider */}
+      {/* Editorial image break */}
       <div className="max-w-5xl mx-auto px-8 relative">
-        <div style={{ height: '1px', background: 'linear-gradient(90deg, transparent, rgba(238, 184, 152, 0.3), transparent)' }} />
         <div
-          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-8 pointer-events-none"
-          style={{
-            background: 'radial-gradient(ellipse, rgba(232, 98, 58, 0.06), transparent 70%)',
-            filter: 'blur(8px)',
-          }}
-        />
+          className="relative rounded-2xl overflow-hidden"
+          style={{ height: '280px', boxShadow: '0 8px 40px rgba(28, 20, 16, 0.08)' }}
+        >
+          <img
+            src="/images/features-bg.webp"
+            alt=""
+            className="w-full h-full object-cover"
+            style={{ filter: 'brightness(1.05) saturate(0.9)' }}
+          />
+          <div
+            className="absolute inset-0"
+            style={{ background: 'linear-gradient(to right, rgba(253,248,245,0.7) 0%, rgba(253,248,245,0.2) 40%, rgba(253,248,245,0.2) 60%, rgba(253,248,245,0.7) 100%)' }}
+          />
+          <div className="absolute inset-0 flex items-center justify-center">
+            <motion.p
+              initial={{ opacity: 0, y: 8 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+              className="text-lg sm:text-xl md:text-2xl text-center px-6"
+              style={{
+                fontFamily: 'var(--font-newsreader)',
+                fontStyle: 'italic',
+                color: '#1C1410',
+                fontWeight: 400,
+                textShadow: '0 1px 20px rgba(253,248,245,0.8)',
+              }}
+            >
+              Every code finds its way home.
+            </motion.p>
+          </div>
+        </div>
       </div>
 
       {/* Features */}
@@ -613,6 +638,25 @@ export default function LandingPage() {
           ))}
         </div>
       </section>
+
+      {/* Editorial image strip before footer */}
+      <div className="max-w-5xl mx-auto px-8 mb-4">
+        <div
+          className="relative rounded-2xl overflow-hidden"
+          style={{ height: '200px', boxShadow: '0 4px 24px rgba(28, 20, 16, 0.06)' }}
+        >
+          <img
+            src="/images/hero-bg.webp"
+            alt=""
+            className="w-full h-full object-cover"
+            style={{ filter: 'brightness(1.08) saturate(0.85)' }}
+          />
+          <div
+            className="absolute inset-0"
+            style={{ background: 'linear-gradient(to bottom, rgba(253,248,245,0.4) 0%, rgba(253,248,245,0.15) 50%, rgba(253,248,245,0.5) 100%)' }}
+          />
+        </div>
+      </div>
 
       {/* Footer */}
       <footer className="max-w-5xl mx-auto px-8 py-10" style={{ borderTop: '1px solid rgba(238, 184, 152, 0.15)' }}>

@@ -2,17 +2,23 @@ import { NextResponse } from 'next/server'
 
 export async function GET() {
   try {
-    const { prisma } = await import('@/lib/prisma')
-    await prisma.$queryRaw`SELECT 1`
+    const { getDomain, verifyDomainRecords } = await import('@/lib/forwardemail-api')
+
+    // mailsifu.com Forward Email domain ID from DB
+    const feId = '69cab1d57a71aae6524f6b26'
+
+    const [domainData, verifyResult] = await Promise.all([
+      getDomain(feId).catch((e: Error) => ({ error: e.message })),
+      verifyDomainRecords(feId).catch((e: Error) => ({ error: e.message })),
+    ])
+
     return NextResponse.json({
-      ok: true,
-      dbUrlPrefix: process.env.DATABASE_URL?.substring(0, 60) + '...',
+      domain: domainData,
+      verify: verifyResult,
     })
   } catch (err) {
     return NextResponse.json({
-      ok: false,
       error: err instanceof Error ? err.message : String(err),
-      dbUrlPrefix: process.env.DATABASE_URL?.substring(0, 60) + '...',
     }, { status: 500 })
   }
 }
