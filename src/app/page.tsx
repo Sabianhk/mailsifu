@@ -1,6 +1,5 @@
 'use client'
 
-import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { Logo } from '@/components/Logo'
 import { Seal } from '@/components/Seal'
@@ -8,6 +7,9 @@ import { WolfMascot } from '@/components/WolfMascot'
 import { Lantern } from '@/components/Lantern'
 import { SectionReveal } from '@/components/SectionReveal'
 import { ScrollProgress } from '@/components/ScrollProgress'
+import { ScrollVelocityBlur } from '@/components/ScrollVelocityBlur'
+import { ChapterIndicator } from '@/components/ChapterIndicator'
+import { MagneticButton } from '@/components/MagneticButton'
 
 const CODES = ['482901', 'H7W822', '739105', '215884', '604277']
 const PROVIDERS = [
@@ -24,6 +26,28 @@ function useMouse() {
     return () => window.removeEventListener('mousemove', f)
   }, [])
   return m
+}
+
+function useScrollY() {
+  const [y, setY] = useState(0)
+  useEffect(() => {
+    let raf = 0
+    const update = () => {
+      raf = 0
+      setY(window.scrollY)
+    }
+    const onScroll = () => {
+      if (raf) return
+      raf = requestAnimationFrame(update)
+    }
+    onScroll()
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => {
+      window.removeEventListener('scroll', onScroll)
+      if (raf) cancelAnimationFrame(raf)
+    }
+  }, [])
+  return y
 }
 
 function TopNav() {
@@ -46,14 +70,15 @@ function TopNav() {
     >
       <Logo size={26} />
       <nav style={{ display: 'flex', alignItems: 'center', gap: 30 }}>
-        <Link
+        <MagneticButton
           href="/auth/signin"
           className="btn btn-cinnabar"
           style={{ padding: '12px 22px', fontSize: 13 }}
+          strength={8}
         >
           <span>Enter dojo</span>
           <span>→</span>
-        </Link>
+        </MagneticButton>
       </nav>
     </header>
   )
@@ -62,6 +87,7 @@ function TopNav() {
 function Hero() {
   const [idx, setIdx] = useState(0)
   const m = useMouse()
+  const scrollY = useScrollY()
 
   useEffect(() => {
     const t = setInterval(() => setIdx((i) => (i + 1) % CODES.length), 4200)
@@ -71,10 +97,13 @@ function Hero() {
   const code = CODES[idx]
   const px = typeof window !== 'undefined' ? (m.x / window.innerWidth - 0.5) * 16 : 0
   const py = typeof window !== 'undefined' ? (m.y / window.innerHeight - 0.5) * 16 : 0
+  // Scroll-linked parallax: only active for first viewport (until hero scrolls offscreen)
+  const heroProgress = typeof window !== 'undefined' ? Math.min(1, scrollY / Math.max(1, window.innerHeight)) : 0
 
   return (
     <section
-      className="r-hero"
+      className="r-hero r-snap"
+      data-chapter="hero"
       style={{
         minHeight: '100vh',
         position: 'relative',
@@ -103,8 +132,9 @@ function Hero() {
       >
         <g
           style={{
-            transform: `translate(${px * 0.4}px, ${py * 0.4}px)`,
+            transform: `translate(${px * 0.4}px, ${py * 0.4 + heroProgress * -80}px) scale(${1 + heroProgress * 0.08})`,
             transition: 'transform 0.6s var(--ease)',
+            transformOrigin: 'center',
           }}
         >
           <path
@@ -141,6 +171,9 @@ function Hero() {
             opacity: 0.03,
             pointerEvents: 'none',
             zIndex: 1,
+            transform: `translateY(${heroProgress * (-120 - i * 30)}px)`,
+            transition: 'transform 0.3s var(--ease)',
+            willChange: 'transform',
             animation: `drift ${8 + i * 1.4}s var(--ease-q) ${i * 0.6}s infinite alternate`,
           }}
         >
@@ -221,11 +254,11 @@ function Hero() {
         </p>
 
         <div style={{ marginTop: 36, display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
-          <Link href="/auth/signin" className="btn btn-cinnabar">
+          <MagneticButton href="/auth/signin" className="btn btn-cinnabar" strength={12} radius={140}>
             <span className="cjk" style={{ fontWeight: 700, marginRight: 4 }}>入</span>
             <span>Enter the dojo</span>
             <span>→</span>
-          </Link>
+          </MagneticButton>
         </div>
 
         <div
@@ -296,7 +329,16 @@ function Hero() {
           minHeight: 580,
         }}
       >
-        <div style={{ position: 'absolute', top: 0, right: 30 }}>
+        <div
+          style={{
+            position: 'absolute',
+            top: 0,
+            right: 30,
+            transform: `translateY(${heroProgress * -40}px)`,
+            transition: 'transform 0.3s var(--ease)',
+            willChange: 'transform',
+          }}
+        >
           <Lantern code={code} size={120} />
         </div>
 
@@ -309,7 +351,9 @@ function Hero() {
             position: 'relative',
             width: 'min(380px, 80vw)',
             animation: 'bob 4s var(--ease-q) infinite',
-            transform: 'rotate(-3deg)',
+            transform: `rotate(${-3 + heroProgress * 6}deg) translateY(${heroProgress * -60}px)`,
+            transition: 'transform 0.3s var(--ease)',
+            willChange: 'transform',
           }}
         >
           <div
@@ -394,7 +438,10 @@ function Hero() {
             bottom: 16,
             right: 30,
             animation: 'bob 4.4s var(--ease-q) infinite',
+            transform: `translateY(${heroProgress * 50}px) scale(${1 - heroProgress * 0.15})`,
+            transition: 'transform 0.3s var(--ease)',
             zIndex: 3,
+            willChange: 'transform',
           }}
         >
           <WolfMascot size={200} />
@@ -411,7 +458,7 @@ function PathSection() {
     { n: '三', t: 'The deliver', d: 'Wolf cub trots over with the code on a scroll. You copy. The kettle whistles.', cjk: '送', en: 'deliver' },
   ]
   return (
-    <section className="r-section" style={{ padding: '160px 60px', position: 'relative' }}>
+    <section className="r-section r-snap" data-chapter="path" style={{ padding: '160px 60px', position: 'relative' }}>
       <SectionReveal variant="stamp">
         <div style={{ display: 'flex', alignItems: 'baseline', gap: 18, marginBottom: 60 }}>
           <Seal char="道" size={48} rotate={-6} />
@@ -420,7 +467,7 @@ function PathSection() {
       </SectionReveal>
       <SectionReveal variant="brush" delay={0.15}>
         <h2
-          className="serif"
+          className="serif r-section-headline"
           style={{
             margin: 0,
             fontSize: 'clamp(40px, 5vw, 80px)',
@@ -459,7 +506,7 @@ function PathSection() {
             }}
           >
             <span
-              className="cjk"
+              className="cjk r-cjk-watermark"
               style={{
                 position: 'absolute',
                 top: -20,
@@ -509,6 +556,8 @@ function ProvidersMarquee() {
     <SectionReveal
       variant="mist"
       as="section"
+      className="r-snap"
+      data-chapter="senders"
       style={{
         padding: '60px 0',
         borderTop: '1px solid var(--line)',
@@ -582,12 +631,12 @@ function ScrollsTimeline() {
     { t: '180 ms', d: 'Mini-wolf trots to your screen, scroll in mouth. Your move.' },
   ]
   return (
-    <section className="r-section" style={{ padding: '160px 60px', background: 'var(--paper-2)' }}>
+    <section className="r-section r-snap" data-chapter="timeline" style={{ padding: '160px 60px', background: 'var(--paper-2)' }}>
       <SectionReveal variant="brush">
         <div style={{ textAlign: 'center', marginBottom: 60 }}>
           <div className="eyebrow">Sub-200ms · 一瞬</div>
           <h2
-            className="serif"
+            className="serif r-section-headline"
             style={{
               margin: '14px 0 0',
               fontSize: 'clamp(40px, 5vw, 70px)',
@@ -665,10 +714,10 @@ function ScrollsTimeline() {
 
 function Manifesto() {
   return (
-    <section className="r-section" style={{ padding: '180px 60px', position: 'relative' }}>
+    <section className="r-section r-snap" data-chapter="manifesto" style={{ padding: '180px 60px', position: 'relative' }}>
       <SectionReveal variant="mist" style={{ maxWidth: 900, margin: '0 auto', textAlign: 'center' }}>
         <span
-          className="cjk"
+          className="cjk r-cjk-watermark"
           style={{
             display: 'block',
             fontSize: 200,
@@ -720,7 +769,8 @@ function Manifesto() {
 function FinalCta() {
   return (
     <section
-      className="r-section"
+      className="r-section r-snap"
+      data-chapter="cta"
       style={{
         padding: '180px 60px',
         textAlign: 'center',
@@ -729,7 +779,7 @@ function FinalCta() {
       }}
     >
       <span
-        className="cjk"
+        className="cjk r-cjk-watermark"
         style={{
           position: 'absolute',
           top: '50%',
@@ -750,7 +800,7 @@ function FinalCta() {
       <div style={{ position: 'relative', zIndex: 2 }}>
         <SectionReveal variant="brush">
           <h2
-            className="serif"
+            className="serif r-section-headline"
             style={{
               margin: 0,
               fontSize: 'clamp(48px, 7vw, 110px)',
@@ -773,17 +823,19 @@ function FinalCta() {
         </SectionReveal>
         <SectionReveal variant="rise" delay={0.5}>
           <div style={{ marginTop: 28, display: 'inline-flex', gap: 14 }}>
-            <Link
+            <MagneticButton
               href="/auth/signin"
               className="btn btn-cinnabar"
               style={{ padding: '18px 32px', fontSize: 16 }}
+              strength={14}
+              radius={160}
             >
               <span className="cjk" style={{ fontWeight: 700, marginRight: 4 }}>
                 入
               </span>
               <span>Enter the dojo</span>
               <span>→</span>
-            </Link>
+            </MagneticButton>
           </div>
         </SectionReveal>
       </div>
@@ -833,7 +885,7 @@ function SectionDivider({ char = '·' }: { char?: string }) {
 
 export default function LandingPage() {
   return (
-    <div className="page">
+    <div className="page r-velocity-blur">
       <TopNav />
       <Hero />
       <SectionDivider char="道" />
@@ -848,6 +900,8 @@ export default function LandingPage() {
       <FinalCta />
       <Footer />
       <ScrollProgress />
+      <ChapterIndicator />
+      <ScrollVelocityBlur />
     </div>
   )
 }

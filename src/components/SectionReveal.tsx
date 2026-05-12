@@ -14,6 +14,8 @@ interface SectionRevealProps {
   as?: keyof React.JSX.IntrinsicElements
   className?: string
   style?: React.CSSProperties
+  /** Any data-* attributes are forwarded to the rendered element */
+  [dataAttr: `data-${string}`]: string | undefined
 }
 
 export function SectionReveal({
@@ -26,6 +28,7 @@ export function SectionReveal({
   as = 'div',
   className,
   style,
+  ...rest
 }: SectionRevealProps) {
   const ref = useRef<HTMLElement>(null)
   const [state, setState] = useState<'out' | 'in'>('out')
@@ -93,6 +96,7 @@ export function SectionReveal({
         ...style,
         transitionDelay: delay ? `${delay}s` : undefined,
       }}
+      {...rest}
     >
       {children}
     </Tag>

@@ -64,6 +64,7 @@
 
 * { box-sizing: border-box; }
 html, body { margin: 0; padding: 0; height: 100%; }
+html { scroll-behavior: smooth; }
 body {
   font-family: var(--font-sans);
   background: var(--paper);
@@ -71,6 +72,23 @@ body {
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
   font-feature-settings: "ss01", "cv01";
+}
+
+/* Luxury scroll: gentle proximity snap to landing sections.
+   `proximity` (not mandatory) means the user is never trapped — fast flicks pass through. */
+html.has-snap { scroll-snap-type: y proximity; }
+html.has-snap .r-snap { scroll-snap-align: start; scroll-snap-stop: normal; scroll-margin-top: 0; }
+
+/* Velocity-driven content blur: applied to the body via a JS-set CSS var.
+   Default --scroll-blur:0px → crisp. JS sets it to e.g. 1.5px when scrolling fast. */
+body { --scroll-blur: 0px; }
+.r-velocity-blur { filter: blur(var(--scroll-blur)); transition: filter 220ms var(--ease); will-change: filter; }
+.r-velocity-blur img, .r-velocity-blur svg, .r-velocity-blur button { filter: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  html.has-snap { scroll-snap-type: none; }
+  .r-velocity-blur { filter: none !important; }
 }
 
 /* Rice-paper grain */
@@ -236,6 +254,14 @@ input, textarea, select { font-family: inherit; }
 @keyframes flapDigit  { 0%,100% { transform: translateY(0); filter: none; } 30% { transform: translateY(-4px); filter: blur(0.4px); } 60% { transform: translateY(2px); } }
 @keyframes lanternSway { 0%,100% { transform: rotate(-3deg); } 50% { transform: rotate(3deg); } }
 @keyframes glow       { 0%,100% { box-shadow: 0 0 0 0 rgba(200,57,43,0.3), 0 0 30px 0 rgba(201,164,94,0.2); } 50% { box-shadow: 0 0 0 12px rgba(200,57,43,0), 0 0 60px 0 rgba(201,164,94,0.4); } }
+@keyframes sealMorph  { 0% { transform: scale(0.5) rotate(-18deg); opacity: 0; } 60% { transform: scale(1.08) rotate(3deg); opacity: 1; } 100% { transform: scale(1) rotate(0); opacity: 1; } }
+@keyframes titleMorph { 0% { opacity: 0; transform: translateY(8px); filter: blur(3px); } 100% { opacity: 1; transform: translateY(0); filter: blur(0); } }
+
+/* Chapter indicator: hide secondary text on small screens, keep just the seal */
+@media (max-width: 640px) {
+  .chapter-indicator-text { display: none !important; }
+  .chapter-indicator { padding: 6px !important; }
+}
 
 /* Reveal helper (lightweight: shown immediately for SSR, useReveal-style animation deferred) */
 .reveal { opacity: 1; }
@@ -333,6 +359,38 @@ input, textarea, select { font-family: inherit; }
   transform: scale(1) rotate(-6deg);
   opacity: 1;
 }
+/* ============================================================
+   Scroll-driven decorative animations (modern CSS scroll timeline)
+   Falls back gracefully — browsers without support just see the
+   static, dimly-colored watermarks.
+   ============================================================ */
+@supports (animation-timeline: view()) {
+  .r-cjk-watermark {
+    animation: cjkDrift linear both;
+    animation-timeline: view();
+    animation-range: entry 0% exit 100%;
+    will-change: transform, opacity;
+  }
+  @keyframes cjkDrift {
+    0%   { transform: translate3d(0, 40px, 0) rotate(-6deg) scale(0.92); opacity: 0; }
+    20%  { opacity: 1; }
+    50%  { transform: translate3d(0, 0, 0) rotate(0deg) scale(1.04); opacity: 1; }
+    80%  { opacity: 1; }
+    100% { transform: translate3d(0, -50px, 0) rotate(8deg) scale(0.95); opacity: 0; }
+  }
+
+  /* Section big headlines: subtle parallax up as you read through */
+  .r-section-headline {
+    animation: headlineLift linear both;
+    animation-timeline: view();
+    animation-range: entry 0% exit 50%;
+  }
+  @keyframes headlineLift {
+    from { transform: translate3d(0, 30px, 0); }
+    to   { transform: translate3d(0, -30px, 0); }
+  }
+}
+
 .r-section-divider .r-section-divider-seal {
   position: absolute;
   left: 50%;
