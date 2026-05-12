@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { after } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { verifyWebhookSignature, ForwardEmailInboundPayload } from '@/lib/forwardemail-webhook'
 import { processForwardEmailInbound } from '@/lib/inbound'
@@ -36,22 +37,27 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 })
   }
 
-  // Log the raw event for debugging (helps see exact payload format)
-  const log = await prisma.webhookEventLog.create({
-    data: {
-      source: 'forwardemail',
-      eventType: 'inbound.email',
-      payload: rawBody,
-    },
+  // Return 200 immediately — Forward Email has a short webhook timeout.
+  // Process asynchronously via after() to avoid timeout-related delivery failures.
+  after(async () => {
+    try {
+      const log = await prisma.webhookEventLog.create({
+        data: {
+          source: 'forwardemail',
+          eventType: 'inbound.email',
+          payload: rawBody,
+        },
+      })
+
+      const result = await processForwardEmailInbound(parsed, log.id)
+
+      if (result.error) {
+        console.error('ForwardEmail webhook processing error:', result.error)
+      }
+    } catch (err) {
+      console.error('ForwardEmail webhook async processing failed:', err)
+    }
   })
 
-  // Process the inbound email
-  const result = await processForwardEmailInbound(parsed, log.id)
-
-  if (result.error) {
-    console.error('ForwardEmail webhook processing error:', result.error)
-  }
-
-  // Always 200 — prevents retries on transient errors
   return NextResponse.json({ received: true })
 }

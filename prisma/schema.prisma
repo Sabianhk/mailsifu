@@ -57,9 +57,10 @@ model User {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
-  accounts    Account[]
-  sessions    Session[]
-  memberships Membership[]
+  accounts         Account[]
+  sessions         Session[]
+  memberships      Membership[]
+  pushDeviceTokens PushDeviceToken[]
 }
 
 model Workspace {
@@ -143,6 +144,19 @@ model OtpExtraction {
   extractedAt       DateTime @default(now())
 
   receivedMessage ReceivedMessage @relation(fields: [receivedMessageId], references: [id], onDelete: Cascade)
+}
+
+model PushDeviceToken {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  platform  String   @default("android")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }
 
 model WebhookEventLog {

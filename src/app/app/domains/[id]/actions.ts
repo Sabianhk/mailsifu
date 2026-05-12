@@ -54,6 +54,13 @@ function buildRequiredRecords(feDomain?: FEDomain | null): DnsRecordWithStatus[]
     })
   }
 
+  records.push({
+    type: 'TXT',
+    name: '@',
+    value: 'v=spf1 include:spf.forwardemail.net -all',
+    verified: false,
+  })
+
   return records
 }
 
@@ -85,12 +92,17 @@ export async function getDomainStatus(
           rec.verified = feDomain.has_mx_record === true
         } else if (rec.value.startsWith('forward-email-site-verification=')) {
           rec.verified = feDomain.has_txt_record === true
+        } else if (rec.value.startsWith('v=spf1')) {
+          rec.verified = feDomain.has_spf_record === true
         }
       }
     }
 
-    const allVerified = records.every((r) => r.verified)
-    const mapped = allVerified ? 'verified' : 'pending'
+    // MX + TXT verification are required; SPF is recommended but not blocking
+    const requiredVerified = records
+      .filter((r) => r.type === 'MX' || r.value.startsWith('forward-email-site-verification='))
+      .every((r) => r.verified)
+    const mapped = requiredVerified ? 'verified' : 'pending'
 
     if (mapped !== domain.status) {
       await prisma.mailDomain.update({

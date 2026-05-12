@@ -6,6 +6,7 @@
  */
 import { prisma } from './prisma'
 import { extractOtp } from './otp'
+import { sendPushToUser } from './push'
 import { parseFromAddress as parseResendFrom, ResendInboundPayload } from './resend-webhook'
 import {
   parseFromAddress as parseFEFrom,
@@ -103,13 +104,12 @@ async function storeInboundMessage({
   const mailDomain = await prisma.mailDomain.findUnique({ where: { domain } })
   if (!mailDomain) return fail(webhookLogId, `No MailDomain configured for: ${domain}`)
 
-  // Find or auto-create the alias row for this specific address
-  let mailAlias = await prisma.mailAlias.findUnique({ where: { address: toAddress } })
-  if (!mailAlias) {
-    mailAlias = await prisma.mailAlias.create({
-      data: { mailDomainId: mailDomain.id, address: toAddress },
-    })
-  }
+  // Find or auto-create the alias row for this specific address (upsert to avoid race conditions)
+  const mailAlias = await prisma.mailAlias.upsert({
+    where: { address: toAddress },
+    update: {},
+    create: { mailDomainId: mailDomain.id, address: toAddress },
+  })
 
   const message = await prisma.receivedMessage.create({
     data: {
@@ -130,6 +130,22 @@ async function storeInboundMessage({
     await prisma.otpExtraction.create({
       data: { receivedMessageId: message.id, otpCode, confidence },
     })
+  }
+
+  // Send push notifications to all workspace members
+  try {
+    const memberships = await prisma.membership.findMany({
+      where: { workspaceId: mailDomain.workspaceId },
+      select: { userId: true },
+    })
+    const pushTitle = otpCode ? `OTP: ${otpCode}` : `New email from ${fromName || fromEmail}`
+    for (const m of memberships) {
+      await sendPushToUser(m.userId, pushTitle, subject, { messageId: message.id }).catch((err) =>
+        console.error('Push notification failed for user', m.userId, err)
+      )
+    }
+  } catch (err) {
+    console.error('Push notification broadcast failed:', err)
   }
 
   if (webhookLogId) {

@@ -1,0 +1,55 @@
+{
+  // OpenClaw main configuration for SifuBot
+  // Replace all UPPERCASE placeholders before deploying
+
+  "model": "anthropic/claude-sonnet-4-20250514",
+
+  "channels": {
+    "telegram": {
+      "enabled": true,
+      "botToken": "YOUR_TELEGRAM_BOT_TOKEN",
+      "dmPolicy": "allowlist",
+      "allowFrom": ["stanley_tg_username"],
+
+      "groups": {
+        "YOUR_SUPERGROUP_CHAT_ID": {
+          "enabled": true,
+          "requireMention": false,
+
+          "topics": {
+            "THREAD_ID_ORDERS": {
+              "enabled": true,
+              "systemPrompt": "You are in the Food Supply Pre-Orders topic. Follow the Topic 1 workflow in SOUL.md. Parse food orders from staff, summarize them in a table, request HQ approval, and write approved orders to Google Sheets.",
+              "requireMention": false,
+              "allowFrom": ["stanley_tg_username", "hq_username", "staff1", "staff2"],
+              "skills": ["google-sheets", "lobster"]
+            },
+            "THREAD_ID_ELECTRICITY": {
+              "enabled": true,
+              "systemPrompt": "You are in the Electricity Meter Reporting topic. Follow the Topic 2 workflow in SOUL.md. Parse meter readings, calculate consumption from previous readings in Google Sheets, report results, and log to sheets.",
+              "requireMention": false,
+              "allowFrom": ["stanley_tg_username", "staff1", "staff2"],
+              "skills": ["google-sheets"]
+            }
+          }
+        }
+      }
+    }
+  },
+
+  "skills": {
+    "entries": {
+      "google-sheets": {
+        "enabled": true,
+        "env": {
+          "GOOGLE_SERVICE_ACCOUNT_KEY": "/home/stanley/.openclaw/credentials/google-service-account.json",
+          "SPREADSHEET_ID_ORDERS": "YOUR_SPREADSHEET_ID_ORDERS",
+          "SPREADSHEET_ID_ELECTRICITY": "YOUR_SPREADSHEET_ID_ELECTRICITY"
+        }
+      },
+      "lobster": {
+        "enabled": true
+      }
+    }
+  }
+}

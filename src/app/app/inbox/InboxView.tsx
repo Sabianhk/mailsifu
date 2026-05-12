@@ -2,9 +2,45 @@
 
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { useState, useTransition, useCallback } from 'react'
+import { useState, useTransition, useCallback, useEffect } from 'react'
 import { archiveMessage } from './actions'
 import { SearchableSelect } from '@/components/SearchableSelect'
+
+function RefreshButton() {
+  const router = useRouter()
+  const [spinning, setSpinning] = useState(false)
+
+  function handleRefresh() {
+    setSpinning(true)
+    router.refresh()
+    // Keep the animation for at least 600ms so it feels intentional
+    setTimeout(() => setSpinning(false), 600)
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={handleRefresh}
+      className="group flex items-center justify-center w-9 h-9 rounded-lg transition-all duration-200 hover:bg-[#ece8e4] active:scale-90"
+      style={{ color: '#8b726a' }}
+      aria-label="Refresh inbox"
+      title="Refresh inbox"
+    >
+      <span
+        className={`material-symbols-outlined transition-transform duration-500 ease-out ${spinning ? 'animate-[spin-once_0.6s_ease-out]' : 'group-hover:rotate-45'}`}
+        style={{ fontSize: '20px' }}
+      >
+        refresh
+      </span>
+      <style>{`
+        @keyframes spin-once {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+      `}</style>
+    </button>
+  )
+}
 
 type OtpExtraction = { otpCode: string | null } | null
 
@@ -32,6 +68,7 @@ interface InboxViewProps {
   aliases: { address: string; label: string | null }[]
   activeDomain: string | null
   activeAlias: string | null
+  lastUpdated: string
 }
 
 function formatTime(dateStr: string) {
@@ -44,16 +81,39 @@ function formatTime(dateStr: string) {
   return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
 }
 
+function formatRelativeTime(dateStr: string) {
+  const diff = Date.now() - new Date(dateStr).getTime()
+  const seconds = Math.floor(diff / 1000)
+  if (seconds < 10) return 'just now'
+  if (seconds < 60) return `${seconds}s ago`
+  const minutes = Math.floor(seconds / 60)
+  if (minutes < 60) return `${minutes} min ago`
+  const hours = Math.floor(minutes / 60)
+  return `${hours}h ago`
+}
+
 function getInitials(name: string) {
   return name.split(' ').map((p) => p[0]).join('').toUpperCase().slice(0, 2)
 }
 
-export function InboxView({ messages, activeMessage: initialActiveMessage, hasExplicitSelection, domains, aliases, activeDomain, activeAlias }: InboxViewProps) {
+export function InboxView({ messages, activeMessage: initialActiveMessage, hasExplicitSelection, domains, aliases, activeDomain, activeAlias, lastUpdated }: InboxViewProps) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const [copiedOtp, setCopiedOtp] = useState(false)
   const [selectedId, setSelectedId] = useState<string | null>(initialActiveMessage?.id ?? null)
   const [hasUserSelected, setHasUserSelected] = useState(hasExplicitSelection)
+  const [relativeTime, setRelativeTime] = useState(() => formatRelativeTime(lastUpdated))
+  const [toastVisible, setToastVisible] = useState(false)
+  const [toastFading, setToastFading] = useState(false)
+
+  // Update relative time every 15 seconds
+  useEffect(() => {
+    setRelativeTime(formatRelativeTime(lastUpdated))
+    const interval = setInterval(() => {
+      setRelativeTime(formatRelativeTime(lastUpdated))
+    }, 15000)
+    return () => clearInterval(interval)
+  }, [lastUpdated])
 
   // Derive active message from client-side state
   const activeMessage = (selectedId ? messages.find((m) => m.id === selectedId) : null) ?? messages[0] ?? null
@@ -85,6 +145,27 @@ export function InboxView({ messages, activeMessage: initialActiveMessage, hasEx
       setCopiedOtp(true)
       setTimeout(() => setCopiedOtp(false), 2000)
     }
+  }
+
+  function handleListOtpCopy(e: React.MouseEvent, code: string) {
+    e.stopPropagation()
+    const writeToClipboard = () => {
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(code).catch(() => {})
+      } else {
+        const el = document.createElement('textarea')
+        el.value = code
+        document.body.appendChild(el)
+        el.select()
+        document.execCommand('copy')
+        document.body.removeChild(el)
+      }
+    }
+    writeToClipboard()
+    setToastVisible(true)
+    setToastFading(false)
+    setTimeout(() => setToastFading(true), 1600)
+    setTimeout(() => { setToastVisible(false); setToastFading(false) }, 2000)
   }
 
   function handleArchive() {
@@ -128,7 +209,7 @@ export function InboxView({ messages, activeMessage: initialActiveMessage, hasEx
           </div>
         </div>
 
-        {/* Filter dropdowns */}
+        {/* Filter dropdowns + refresh */}
         <div className="flex items-center gap-2 px-5 pb-3" style={{ fontFamily: 'var(--font-manrope)', fontSize: '0.75rem' }}>
           <SearchableSelect
             options={domains.map((d) => ({ value: d, label: d }))}
@@ -156,6 +237,18 @@ export function InboxView({ messages, activeMessage: initialActiveMessage, hasEx
               })
             }}
           />
+          <div className="ml-auto">
+            <RefreshButton />
+          </div>
+        </div>
+
+        {/* Last updated */}
+        <div className="px-5 pb-2">
+          <span
+            style={{ fontFamily: 'var(--font-manrope)', fontSize: '0.65rem', color: '#8b726a' }}
+          >
+            Last updated: {relativeTime}
+          </span>
         </div>
 
         {/* Messages */}
@@ -217,14 +310,19 @@ export function InboxView({ messages, activeMessage: initialActiveMessage, hasEx
                 </p>
                 {msg.otpExtraction?.otpCode && (
                   <span
-                    className="mt-2 inline-block text-[11px] font-bold px-2.5 py-0.5 rounded-full"
+                    role="button"
+                    tabIndex={0}
+                    onClick={(e) => handleListOtpCopy(e, msg.otpExtraction!.otpCode!)}
+                    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleListOtpCopy(e as unknown as React.MouseEvent, msg.otpExtraction!.otpCode!) } }}
+                    className="mt-2 inline-block text-[11px] font-bold px-2.5 py-0.5 rounded-full cursor-pointer transition-opacity hover:opacity-80 active:scale-95"
                     style={{ background: '#f4dfcb', color: '#832800', fontFamily: 'var(--font-manrope)', letterSpacing: '0.05em' }}
+                    title="Click to copy OTP"
                   >
                     OTP: {msg.otpExtraction.otpCode}
                   </span>
                 )}
                 {!msg.isRead && !isActive && (
-                  <div className="absolute right-3 top-4 w-2 h-2 rounded-full" style={{ background: '#832800' }} />
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2 w-2 h-2 rounded-full" style={{ background: '#832800' }} />
                 )}
               </button>
             )
@@ -390,6 +488,25 @@ export function InboxView({ messages, activeMessage: initialActiveMessage, hasEx
             </p>
           </div>
         </section>
+      )}
+
+      {/* OTP copied toast */}
+      {toastVisible && (
+        <div
+          className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 px-4 py-2.5 rounded-lg shadow-lg transition-all duration-300"
+          style={{
+            background: '#1c1c1a',
+            color: '#ffffff',
+            fontFamily: 'var(--font-manrope)',
+            fontSize: '0.8125rem',
+            fontWeight: 500,
+            opacity: toastFading ? 0 : 1,
+            transform: `translateX(-50%) translateY(${toastFading ? '8px' : '0'})`,
+          }}
+        >
+          <span className="material-symbols-outlined" style={{ fontSize: '16px', color: '#4ade80' }}>check_circle</span>
+          OTP copied!
+        </div>
       )}
     </div>
   )

@@ -26,7 +26,7 @@ const getCachedFilterOptions = unstable_cache(
     }
   },
   ['inbox-filter-options'],
-  { revalidate: 30, tags: ['inbox-filters'] }
+  { revalidate: 30 }
 )
 
 export default async function InboxPage({
@@ -128,6 +128,7 @@ export default async function InboxPage({
         aliases={aliasOptions}
         activeDomain={filterDomain ?? null}
         activeAlias={filterAlias ?? null}
+        lastUpdated={new Date().toISOString()}
       />
     </main>
   )

@@ -202,7 +202,7 @@ function SignInForm() {
             className="text-center text-xs mt-6"
             style={{ fontFamily: 'var(--font-manrope)', color: '#8b726a' }}
           >
-            MailSifu \u00b7 Internal access only
+            MailSifu &middot; Internal access only
           </p>
         </div>
       </div>

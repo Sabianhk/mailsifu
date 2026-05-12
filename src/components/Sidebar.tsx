@@ -8,9 +8,10 @@ interface SidebarProps {
   userName: string
   userEmail: string
   isAdmin?: boolean
+  unreadCount?: number
 }
 
-export function Sidebar({ userName, userEmail, isAdmin }: SidebarProps) {
+export function Sidebar({ userName, userEmail, isAdmin, unreadCount = 0 }: SidebarProps) {
   const [isOpen, setIsOpen] = useState(false)
   const pathname = usePathname()
   const activePage = pathname.startsWith('/app/admin/users')
@@ -103,6 +104,22 @@ export function Sidebar({ userName, userEmail, isAdmin }: SidebarProps) {
           >
             <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>inbox</span>
             <span>Inbox</span>
+            {unreadCount > 0 && (
+              <span
+                className="ml-auto flex items-center justify-center rounded-full text-white font-bold"
+                style={{
+                  background: '#832800',
+                  fontFamily: 'var(--font-manrope)',
+                  fontSize: '11px',
+                  minWidth: '20px',
+                  height: '20px',
+                  padding: '0 6px',
+                  lineHeight: 1,
+                }}
+              >
+                {unreadCount > 99 ? '99+' : unreadCount}
+              </span>
+            )}
           </Link>
 
           <Link
