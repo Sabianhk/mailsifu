@@ -6,6 +6,8 @@ import { Logo } from '@/components/Logo'
 import { Seal } from '@/components/Seal'
 import { WolfMascot } from '@/components/WolfMascot'
 import { Lantern } from '@/components/Lantern'
+import { SectionReveal } from '@/components/SectionReveal'
+import { ScrollProgress } from '@/components/ScrollProgress'
 
 const CODES = ['482901', 'H7W822', '739105', '215884', '604277']
 const PROVIDERS = [
@@ -410,35 +412,42 @@ function PathSection() {
   ]
   return (
     <section className="r-section" style={{ padding: '160px 60px', position: 'relative' }}>
-      <div style={{ display: 'flex', alignItems: 'baseline', gap: 18, marginBottom: 60 }}>
-        <Seal char="道" size={48} rotate={-6} />
-        <span className="eyebrow">The Way · 道</span>
-      </div>
-      <h2
-        className="serif"
-        style={{
-          margin: 0,
-          fontSize: 'clamp(40px, 5vw, 80px)',
-          fontWeight: 400,
-          lineHeight: 1.0,
-          letterSpacing: '-0.025em',
-          maxWidth: 1000,
-        }}
-      >
-        Three motions.
-        <br />
-        <span className="serif-it" style={{ color: 'var(--cinnabar)' }}>
-          Then the code is yours.
-        </span>
-      </h2>
+      <SectionReveal variant="stamp">
+        <div style={{ display: 'flex', alignItems: 'baseline', gap: 18, marginBottom: 60 }}>
+          <Seal char="道" size={48} rotate={-6} />
+          <span className="eyebrow">The Way · 道</span>
+        </div>
+      </SectionReveal>
+      <SectionReveal variant="brush" delay={0.15}>
+        <h2
+          className="serif"
+          style={{
+            margin: 0,
+            fontSize: 'clamp(40px, 5vw, 80px)',
+            fontWeight: 400,
+            lineHeight: 1.0,
+            letterSpacing: '-0.025em',
+            maxWidth: 1000,
+          }}
+        >
+          Three motions.
+          <br />
+          <span className="serif-it" style={{ color: 'var(--cinnabar)' }}>
+            Then the code is yours.
+          </span>
+        </h2>
+      </SectionReveal>
 
       <div
         className="r-3col"
         style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 24, marginTop: 80 }}
       >
         {items.map((it, i) => (
-          <div
+          <SectionReveal
             key={it.n}
+            variant="unfurl"
+            delay={0.1 + i * 0.18}
+            as="div"
             className="r-card"
             style={{
               background: 'var(--rice)',
@@ -487,7 +496,7 @@ function PathSection() {
                 {it.en}
               </span>
             </div>
-          </div>
+          </SectionReveal>
         ))}
       </div>
     </section>
@@ -497,7 +506,9 @@ function PathSection() {
 function ProvidersMarquee() {
   const row = [...PROVIDERS, ...PROVIDERS, ...PROVIDERS]
   return (
-    <section
+    <SectionReveal
+      variant="mist"
+      as="section"
       style={{
         padding: '60px 0',
         borderTop: '1px solid var(--line)',
@@ -559,7 +570,7 @@ function ProvidersMarquee() {
           ))}
         </div>
       </div>
-    </section>
+    </SectionReveal>
   )
 }
 
@@ -572,24 +583,26 @@ function ScrollsTimeline() {
   ]
   return (
     <section className="r-section" style={{ padding: '160px 60px', background: 'var(--paper-2)' }}>
-      <div style={{ textAlign: 'center', marginBottom: 60 }}>
-        <div className="eyebrow">Sub-200ms · 一瞬</div>
-        <h2
-          className="serif"
-          style={{
-            margin: '14px 0 0',
-            fontSize: 'clamp(40px, 5vw, 70px)',
-            fontWeight: 400,
-            lineHeight: 1,
-            letterSpacing: '-0.02em',
-          }}
-        >
-          From <span className="serif-it" style={{ color: 'var(--cinnabar)' }}>arrival</span>{' '}
-          to your clipboard,
-          <br />
-          in a single breath.
-        </h2>
-      </div>
+      <SectionReveal variant="brush">
+        <div style={{ textAlign: 'center', marginBottom: 60 }}>
+          <div className="eyebrow">Sub-200ms · 一瞬</div>
+          <h2
+            className="serif"
+            style={{
+              margin: '14px 0 0',
+              fontSize: 'clamp(40px, 5vw, 70px)',
+              fontWeight: 400,
+              lineHeight: 1,
+              letterSpacing: '-0.02em',
+            }}
+          >
+            From <span className="serif-it" style={{ color: 'var(--cinnabar)' }}>arrival</span>{' '}
+            to your clipboard,
+            <br />
+            in a single breath.
+          </h2>
+        </div>
+      </SectionReveal>
       <div style={{ position: 'relative', maxWidth: 1100, margin: '0 auto' }}>
         <svg viewBox="0 0 1100 120" width="100%" style={{ height: 120 }} aria-hidden>
           <path
@@ -622,7 +635,12 @@ function ScrollsTimeline() {
           }}
         >
           {phases.map((p, i) => (
-            <div key={i} style={{ textAlign: 'center', padding: '0 8px' }}>
+            <SectionReveal
+              key={i}
+              variant="rise"
+              delay={0.15 + i * 0.12}
+              style={{ textAlign: 'center', padding: '0 8px' }}
+            >
               <div
                 className="mono"
                 style={{
@@ -637,7 +655,7 @@ function ScrollsTimeline() {
               <p style={{ marginTop: 8, fontSize: 13, lineHeight: 1.55, color: 'var(--ink-3)' }}>
                 {p.d}
               </p>
-            </div>
+            </SectionReveal>
           ))}
         </div>
       </div>
@@ -648,7 +666,7 @@ function ScrollsTimeline() {
 function Manifesto() {
   return (
     <section className="r-section" style={{ padding: '180px 60px', position: 'relative' }}>
-      <div style={{ maxWidth: 900, margin: '0 auto', textAlign: 'center' }}>
+      <SectionReveal variant="mist" style={{ maxWidth: 900, margin: '0 auto', textAlign: 'center' }}>
         <span
           className="cjk"
           style={{
@@ -694,7 +712,7 @@ function Manifesto() {
         >
           ━━━━ Sifu, on the inbox · 信师语录 ━━━━
         </div>
-      </div>
+      </SectionReveal>
     </section>
   )
 }
@@ -730,38 +748,44 @@ function FinalCta() {
       </span>
 
       <div style={{ position: 'relative', zIndex: 2 }}>
-        <h2
-          className="serif"
-          style={{
-            margin: 0,
-            fontSize: 'clamp(48px, 7vw, 110px)',
-            fontWeight: 400,
-            lineHeight: 0.96,
-            letterSpacing: '-0.03em',
-          }}
-        >
-          When your code arrives,
-          <br />
-          <span className="serif-it" style={{ color: 'var(--cinnabar)' }}>
-            so will the wolf.
-          </span>
-        </h2>
-        <div style={{ display: 'flex', justifyContent: 'center', marginTop: 48, marginBottom: -10 }}>
-          <WolfMascot size={170} />
-        </div>
-        <div style={{ marginTop: 28, display: 'inline-flex', gap: 14 }}>
-          <Link
-            href="/auth/signin"
-            className="btn btn-cinnabar"
-            style={{ padding: '18px 32px', fontSize: 16 }}
+        <SectionReveal variant="brush">
+          <h2
+            className="serif"
+            style={{
+              margin: 0,
+              fontSize: 'clamp(48px, 7vw, 110px)',
+              fontWeight: 400,
+              lineHeight: 0.96,
+              letterSpacing: '-0.03em',
+            }}
           >
-            <span className="cjk" style={{ fontWeight: 700, marginRight: 4 }}>
-              入
+            When your code arrives,
+            <br />
+            <span className="serif-it" style={{ color: 'var(--cinnabar)' }}>
+              so will the wolf.
             </span>
-            <span>Enter the dojo</span>
-            <span>→</span>
-          </Link>
-        </div>
+          </h2>
+        </SectionReveal>
+        <SectionReveal variant="stamp" delay={0.3}>
+          <div style={{ display: 'flex', justifyContent: 'center', marginTop: 48, marginBottom: -10 }}>
+            <WolfMascot size={170} />
+          </div>
+        </SectionReveal>
+        <SectionReveal variant="rise" delay={0.5}>
+          <div style={{ marginTop: 28, display: 'inline-flex', gap: 14 }}>
+            <Link
+              href="/auth/signin"
+              className="btn btn-cinnabar"
+              style={{ padding: '18px 32px', fontSize: 16 }}
+            >
+              <span className="cjk" style={{ fontWeight: 700, marginRight: 4 }}>
+                入
+              </span>
+              <span>Enter the dojo</span>
+              <span>→</span>
+            </Link>
+          </div>
+        </SectionReveal>
       </div>
     </section>
   )
@@ -796,17 +820,34 @@ function Footer() {
   )
 }
 
+function SectionDivider({ char = '·' }: { char?: string }) {
+  return (
+    <SectionReveal as="div" variant="brush" className="r-section-divider" threshold={0.4}>
+      <svg viewBox="0 0 600 28" preserveAspectRatio="none" aria-hidden>
+        <path d="M10 14 Q150 4 300 14 Q450 24 590 12" />
+      </svg>
+      <span className="r-section-divider-seal" aria-hidden>{char}</span>
+    </SectionReveal>
+  )
+}
+
 export default function LandingPage() {
   return (
     <div className="page">
       <TopNav />
       <Hero />
+      <SectionDivider char="道" />
       <PathSection />
+      <SectionDivider char="使" />
       <ProvidersMarquee />
+      <SectionDivider char="瞬" />
       <ScrollsTimeline />
+      <SectionDivider char="静" />
       <Manifesto />
+      <SectionDivider char="师" />
       <FinalCta />
       <Footer />
+      <ScrollProgress />
     </div>
   )
 }
