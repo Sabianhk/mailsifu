@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useState, useTransition, useCallback } from 'react'
 import { archiveMessage } from './actions'
 import { SearchableSelect } from '@/components/SearchableSelect'
+import { WolfMascot } from '@/components/WolfMascot'
 
 type OtpExtraction = { otpCode: string | null } | null
 
@@ -44,38 +45,40 @@ function formatTime(dateStr: string) {
   return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
 }
 
-function getInitials(name: string) {
-  return name.split(' ').map((p) => p[0]).join('').toUpperCase().slice(0, 2)
-}
-
-export function InboxView({ messages, activeMessage: initialActiveMessage, hasExplicitSelection, domains, aliases, activeDomain, activeAlias }: InboxViewProps) {
+export function InboxView({
+  messages,
+  activeMessage: initialActiveMessage,
+  hasExplicitSelection,
+  domains,
+  aliases,
+  activeDomain,
+  activeAlias,
+}: InboxViewProps) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const [copiedOtp, setCopiedOtp] = useState(false)
   const [selectedId, setSelectedId] = useState<string | null>(initialActiveMessage?.id ?? null)
   const [hasUserSelected, setHasUserSelected] = useState(hasExplicitSelection)
 
-  // Derive active message from client-side state
   const activeMessage = (selectedId ? messages.find((m) => m.id === selectedId) : null) ?? messages[0] ?? null
-
-  // On mobile: show detail only when user explicitly selected a message
   const showDetailOnMobile = hasUserSelected && activeMessage !== null
 
   const handleSelectMessage = useCallback((msgId: string) => {
     setSelectedId(msgId)
     setHasUserSelected(true)
-    // Update URL for bookmarkability without triggering server navigation
     window.history.replaceState(null, '', `/app/inbox?id=${msgId}`)
   }, [])
 
   function handleCopyOtp(code: string) {
     if (navigator.clipboard) {
-      navigator.clipboard.writeText(code).then(() => {
-        setCopiedOtp(true)
-        setTimeout(() => setCopiedOtp(false), 2000)
-      }).catch(() => {})
+      navigator.clipboard
+        .writeText(code)
+        .then(() => {
+          setCopiedOtp(true)
+          setTimeout(() => setCopiedOtp(false), 2000)
+        })
+        .catch(() => {})
     } else {
-      // fallback for older browsers
       const el = document.createElement('textarea')
       el.value = code
       document.body.appendChild(el)
@@ -99,132 +102,269 @@ export function InboxView({ messages, activeMessage: initialActiveMessage, hasEx
   }
 
   return (
-    <div className="flex-1 flex overflow-hidden">
+    <div className="r-inbox flex-1 flex overflow-hidden">
       {/* Message list */}
       <section
         className={[
-          'overflow-hidden flex-shrink-0',
+          'r-inbox-list overflow-hidden flex-shrink-0 flex-col',
           'w-full md:w-[380px]',
-          // On mobile: hide list when showing detail
-          showDetailOnMobile ? 'hidden md:flex md:flex-col' : 'flex flex-col',
+          showDetailOnMobile ? 'hidden md:flex' : 'flex',
         ].join(' ')}
-        style={{ background: '#f6f3f0' }}
+        style={{
+          background: 'var(--paper)',
+          borderRight: '1px solid var(--line)',
+        }}
       >
-        {/* Search */}
-        <div className="p-4">
-          <div className="relative">
+        {/* Header + search */}
+        <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--line)' }}>
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginBottom: 16,
+            }}
+          >
+            <span className="serif" style={{ fontSize: 24, fontWeight: 500, color: 'var(--ink)' }}>
+              Inbox{' '}
+              <span className="cjk" style={{ color: 'var(--cinnabar)', fontSize: 20 }}>
+                · 收
+              </span>
+            </span>
             <span
-              className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none"
-              style={{ fontSize: '16px', color: '#8b726a' }}
+              className="mono"
+              style={{
+                fontSize: 10,
+                color: 'var(--ink-3)',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 6,
+                letterSpacing: '0.1em',
+              }}
             >
-              search
+              <span
+                style={{
+                  width: 6,
+                  height: 6,
+                  borderRadius: 999,
+                  background: 'var(--cinnabar)',
+                  animation: 'pulseDot 2s infinite',
+                }}
+              />
+              live
+            </span>
+          </div>
+
+          <div style={{ position: 'relative' }}>
+            <span
+              style={{
+                position: 'absolute',
+                left: 14,
+                top: '50%',
+                transform: 'translateY(-50%)',
+                fontSize: 13,
+                color: 'var(--ink-4)',
+                pointerEvents: 'none',
+              }}
+            >
+              ⌕
             </span>
             <input
-              className="w-full py-2.5 pl-9 pr-4 rounded-lg text-base focus:outline-none cursor-not-allowed"
-              style={{ background: '#f0edea', color: '#8b726a', fontFamily: 'var(--font-manrope)', border: 'none', opacity: 0.6 }}
-              placeholder="Search messages…"
+              placeholder="Search messages, codes, senders…"
               disabled
+              style={{
+                width: '100%',
+                padding: '11px 14px 11px 38px',
+                borderRadius: 10,
+                background: 'var(--rice)',
+                border: '1px solid var(--line)',
+                fontSize: 13,
+                outline: 'none',
+                color: 'var(--ink-3)',
+                opacity: 0.7,
+                cursor: 'not-allowed',
+                fontFamily: 'var(--font-sans)',
+              }}
+            />
+          </div>
+
+          {/* Filters */}
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 8,
+              marginTop: 12,
+              fontSize: 12,
+            }}
+          >
+            <SearchableSelect
+              options={domains.map((d) => ({ value: d, label: d }))}
+              selectedValue={activeDomain}
+              placeholder="All Domains"
+              onChange={(val) => {
+                const params = new URLSearchParams()
+                if (val) params.set('domain', val)
+                if (activeAlias) params.set('alias', activeAlias)
+                startTransition(() => {
+                  router.push(`/app/inbox${params.toString() ? `?${params}` : ''}`)
+                })
+              }}
+            />
+            <SearchableSelect
+              options={aliases.map((a) => ({
+                value: a.address,
+                label: a.label ?? a.address.split('@')[0],
+              }))}
+              selectedValue={activeAlias}
+              placeholder="All Aliases"
+              onChange={(val) => {
+                const params = new URLSearchParams()
+                if (activeDomain) params.set('domain', activeDomain)
+                if (val) params.set('alias', val)
+                startTransition(() => {
+                  router.push(`/app/inbox${params.toString() ? `?${params}` : ''}`)
+                })
+              }}
             />
           </div>
         </div>
 
-        {/* Filter dropdowns */}
-        <div className="flex items-center gap-2 px-5 pb-3" style={{ fontFamily: 'var(--font-manrope)', fontSize: '0.75rem' }}>
-          <SearchableSelect
-            options={domains.map((d) => ({ value: d, label: d }))}
-            selectedValue={activeDomain}
-            placeholder="All Domains"
-            onChange={(val) => {
-              const params = new URLSearchParams()
-              if (val) params.set('domain', val)
-              if (activeAlias) params.set('alias', activeAlias)
-              startTransition(() => {
-                router.push(`/app/inbox${params.toString() ? `?${params}` : ''}`)
-              })
-            }}
-          />
-          <SearchableSelect
-            options={aliases.map((a) => ({ value: a.address, label: a.label ?? a.address.split('@')[0] }))}
-            selectedValue={activeAlias}
-            placeholder="All Aliases"
-            onChange={(val) => {
-              const params = new URLSearchParams()
-              if (activeDomain) params.set('domain', activeDomain)
-              if (val) params.set('alias', val)
-              startTransition(() => {
-                router.push(`/app/inbox${params.toString() ? `?${params}` : ''}`)
-              })
-            }}
-          />
-        </div>
-
-        {/* Messages */}
-        <div className={`flex-1 overflow-y-auto px-3 pb-8 space-y-1 transition-opacity duration-150 ${isPending ? 'opacity-60' : ''}`}>
+        {/* Message rows */}
+        <div
+          className={`flex-1 overflow-y-auto transition-opacity duration-150 ${isPending ? 'opacity-60' : ''}`}
+          style={{ padding: '12px 12px 60px' }}
+        >
           {messages.length === 0 && (
-            <div className="flex flex-col items-center justify-center h-full py-16 px-6 text-center">
+            <div style={{ padding: 40, textAlign: 'center', color: 'var(--ink-4)', fontSize: 13 }}>
               <div
-                className="w-12 h-12 rounded-full flex items-center justify-center mb-4"
-                style={{ background: '#e5e2da' }}
+                className="cjk"
+                style={{ fontSize: 36, color: 'var(--ink-5)', marginBottom: 10, opacity: 0.5 }}
               >
-                <span className="material-symbols-outlined" style={{ color: '#57423b', fontSize: '22px' }}>inbox</span>
+                空
               </div>
-              <p className="text-sm font-medium mb-1" style={{ color: '#1c1c1a', fontFamily: 'var(--font-manrope)' }}>No messages yet</p>
-              <p className="text-xs leading-relaxed" style={{ color: '#5f5e58', fontFamily: 'var(--font-manrope)' }}>
-                Messages from your configured domains will appear here once email receiving is set up.
+              <p className="mono" style={{ fontSize: 11, letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 6 }}>
+                No messages yet
+              </p>
+              <p style={{ fontSize: 12, color: 'var(--ink-4)' }}>
+                Codes from your domains will appear here.
               </p>
             </div>
           )}
-          {messages.map((msg) => {
+
+          {messages.map((msg, i) => {
             const isActive = msg.id === activeMessage?.id
+            const code = msg.otpExtraction?.otpCode
             return (
               <button
                 type="button"
                 key={msg.id}
                 onClick={() => handleSelectMessage(msg.id)}
-                className="relative px-4 py-4 rounded-lg transition-all block min-h-[44px] w-full text-left cursor-pointer"
                 style={{
-                  background: isActive ? 'rgba(255,255,255,0.9)' : 'transparent',
+                  width: '100%',
+                  textAlign: 'left',
+                  padding: '14px 16px',
+                  borderRadius: 12,
+                  marginBottom: 6,
+                  background: isActive ? 'var(--rice)' : 'transparent',
+                  border: isActive ? '1px solid var(--line-2)' : '1px solid transparent',
+                  boxShadow: isActive ? '0 12px 30px -20px rgba(0,0,0,0.2)' : 'none',
+                  transition: 'all 0.4s var(--ease)',
+                  animation: `rowIn 0.5s var(--ease) ${i * 0.03}s both`,
+                  position: 'relative',
+                  overflow: 'hidden',
+                  cursor: 'pointer',
                 }}
               >
-                <div className="flex justify-between items-start mb-1">
+                {isActive && (
                   <span
-                    className="text-[13px]"
-                    style={{ fontFamily: 'var(--font-manrope)', fontWeight: isActive ? 700 : 500, color: isActive ? '#1c1c1a' : '#5f5e58' }}
-                  >
+                    style={{
+                      position: 'absolute',
+                      left: 0,
+                      top: '50%',
+                      transform: 'translateY(-50%)',
+                      width: 3,
+                      height: '60%',
+                      background: 'var(--cinnabar)',
+                      borderRadius: 999,
+                    }}
+                  />
+                )}
+
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    marginBottom: 6,
+                  }}
+                >
+                  <span style={{ fontSize: 12, color: 'var(--ink-3)' }}>
                     {msg.fromName ?? msg.fromEmail}
                   </span>
-                  <span className="text-[11px]" style={{ fontFamily: 'var(--font-manrope)', color: '#8b726a' }}>
+                  <span className="mono" style={{ fontSize: 10, color: 'var(--ink-4)' }}>
                     {formatTime(msg.receivedAt)}
                   </span>
                 </div>
-                <h4
-                  className="text-[13px] mb-1 truncate"
-                  style={{ fontFamily: 'var(--font-manrope)', fontWeight: 600, color: isActive ? '#1c1c1a' : '#57423b' }}
+
+                <div
+                  style={{
+                    fontWeight: msg.isRead ? 500 : 600,
+                    fontSize: 14,
+                    marginBottom: 4,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 6,
+                    color: 'var(--ink)',
+                  }}
                 >
-                  {msg.subject}
-                </h4>
-                <p
-                  className="text-[11px] mb-0.5 truncate"
-                  style={{ color: '#8b726a', fontFamily: 'var(--font-manrope)' }}
-                >
-                  &rarr; {msg.toEmail}
-                </p>
-                <p
-                  className="text-[12px] leading-relaxed line-clamp-2"
-                  style={{ color: '#8b726a', fontFamily: 'var(--font-manrope)' }}
-                >
-                  {msg.bodyText?.slice(0, 120) ?? (msg.bodyHtml ? '(HTML email)' : '')}
-                </p>
-                {msg.otpExtraction?.otpCode && (
+                  {!msg.isRead && (
+                    <span
+                      style={{
+                        width: 6,
+                        height: 6,
+                        borderRadius: 999,
+                        background: 'var(--cinnabar)',
+                        flexShrink: 0,
+                      }}
+                    />
+                  )}
                   <span
-                    className="mt-2 inline-block text-[11px] font-bold px-2.5 py-0.5 rounded-full"
-                    style={{ background: '#f4dfcb', color: '#832800', fontFamily: 'var(--font-manrope)', letterSpacing: '0.05em' }}
+                    style={{
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                    }}
                   >
-                    OTP: {msg.otpExtraction.otpCode}
+                    {msg.subject}
                   </span>
-                )}
-                {!msg.isRead && !isActive && (
-                  <div className="absolute right-3 top-4 w-2 h-2 rounded-full" style={{ background: '#832800' }} />
+                </div>
+
+                <div style={{ fontSize: 11, color: 'var(--ink-3)', marginBottom: 8 }}>
+                  →{' '}
+                  <span className="mono" style={{ color: 'var(--ink-3)' }}>
+                    {msg.toEmail}
+                  </span>
+                </div>
+
+                {code && (
+                  <div
+                    className="mono"
+                    style={{
+                      display: 'inline-flex',
+                      background: isActive
+                        ? 'var(--cinnabar-soft)'
+                        : 'rgba(235, 185, 174, 0.4)',
+                      color: 'var(--cinnabar-3)',
+                      padding: '4px 10px',
+                      borderRadius: 6,
+                      fontSize: 11,
+                      fontWeight: 600,
+                      letterSpacing: '0.04em',
+                    }}
+                  >
+                    OTP · {code}
+                  </div>
                 )}
               </button>
             )
@@ -236,21 +376,24 @@ export function InboxView({ messages, activeMessage: initialActiveMessage, hasEx
       {activeMessage ? (
         <section
           className={[
-            'flex-1 overflow-hidden bg-surface-container-lowest',
-            // On mobile: show detail only when explicitly selected
-            showDetailOnMobile ? 'flex flex-col' : 'hidden md:flex md:flex-col',
+            'r-inbox-detail flex-1 overflow-hidden flex-col',
+            showDetailOnMobile ? 'flex' : 'hidden md:flex',
           ].join(' ')}
+          style={{
+            background: 'var(--paper)',
+            position: 'relative',
+          }}
         >
+          {/* Detail toolbar */}
           <div
             className="h-14 flex items-center justify-between px-4 md:px-8 flex-shrink-0"
-            style={{ borderBottom: '0.5px solid rgba(222,192,183,0.2)' }}
+            style={{ borderBottom: '1px solid var(--line)' }}
           >
             <div className="flex items-center gap-1">
-              {/* Back button — mobile only */}
               <Link
                 href="/app/inbox"
-                className="md:hidden flex items-center gap-1 px-2 py-2 rounded-lg transition-colors hover:bg-[#f0edea] min-h-[44px] min-w-[44px] justify-center"
-                style={{ color: '#5f5e58' }}
+                className="md:hidden flex items-center gap-1 px-2 py-2 rounded-lg min-h-[44px] min-w-[44px] justify-center"
+                style={{ color: 'var(--ink-3)' }}
                 aria-label="Back to inbox"
               >
                 <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>arrow_back</span>
@@ -259,8 +402,17 @@ export function InboxView({ messages, activeMessage: initialActiveMessage, hasEx
               <button
                 type="button"
                 onClick={handleArchive}
-                className="flex items-center gap-2 px-3 py-1.5 rounded-lg transition-colors hover:bg-[#f0edea] min-h-[44px]"
-                style={{ fontFamily: 'var(--font-manrope)', fontSize: '0.8125rem', color: '#5f5e58' }}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 8,
+                  padding: '8px 14px',
+                  borderRadius: 10,
+                  fontSize: 13,
+                  color: 'var(--ink-3)',
+                  transition: 'all 0.3s',
+                  minHeight: 44,
+                }}
               >
                 <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>archive</span>
                 Archive
@@ -269,124 +421,254 @@ export function InboxView({ messages, activeMessage: initialActiveMessage, hasEx
           </div>
 
           <div className="flex-1 overflow-y-auto">
-            <div className="max-w-3xl mx-auto px-4 md:px-12 py-6 md:py-12">
-              {/* OTP highlight */}
+            <div style={{ maxWidth: 760, margin: '0 auto', padding: '40px 32px 80px' }}>
+              {/* Big OTP card */}
               {activeMessage.otpExtraction?.otpCode && (
                 <div
-                  className="mb-8 px-6 py-5 rounded-xl flex items-center justify-between gap-4"
-                  style={{ background: '#f4dfcb', border: '0.5px solid rgba(222,192,183,0.2)' }}
+                  onClick={() => handleCopyOtp(activeMessage.otpExtraction!.otpCode!)}
+                  className="r-otp-card"
+                  style={{
+                    background:
+                      'linear-gradient(135deg, var(--cinnabar-soft) 0%, #F5D4C5 100%)',
+                    borderRadius: 16,
+                    padding: '28px 32px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    cursor: 'pointer',
+                    transition: 'transform 0.4s var(--ease), box-shadow 0.4s',
+                    boxShadow: '0 12px 30px -20px rgba(200,57,43,0.2)',
+                    animation: copiedOtp ? 'copyBurst 0.5s var(--ease-s)' : 'none',
+                    position: 'relative',
+                    overflow: 'hidden',
+                    gap: 16,
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = 'translateY(-2px)'
+                    e.currentTarget.style.boxShadow = '0 30px 60px -30px rgba(200,57,43,0.4)'
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = ''
+                    e.currentTarget.style.boxShadow = '0 12px 30px -20px rgba(200,57,43,0.2)'
+                  }}
                 >
-                  <div className="min-w-0">
-                    <p
-                      className="uppercase tracking-widest mb-2"
-                      style={{ fontFamily: 'var(--font-manrope)', fontSize: '0.65rem', color: '#57423b' }}
+                  <span
+                    className="cjk"
+                    style={{
+                      position: 'absolute',
+                      right: -20,
+                      top: '50%',
+                      transform: 'translateY(-50%)',
+                      fontSize: 200,
+                      fontWeight: 900,
+                      color: 'var(--cinnabar)',
+                      opacity: 0.08,
+                      lineHeight: 1,
+                      pointerEvents: 'none',
+                    }}
+                  >
+                    码
+                  </span>
+                  <div style={{ position: 'relative', minWidth: 0 }}>
+                    <div
+                      className="mono"
+                      style={{
+                        fontSize: 11,
+                        letterSpacing: '0.16em',
+                        textTransform: 'uppercase',
+                        color: 'var(--cinnabar-3)',
+                        opacity: 0.85,
+                      }}
                     >
-                      OTP Code
-                    </p>
-                    <p
-                      className="text-2xl md:text-3xl font-bold tracking-[0.2em] font-mono break-all"
-                      style={{ fontFamily: 'var(--font-newsreader)', color: '#832800' }}
+                      OTP code · 一次性
+                    </div>
+                    <div
+                      className="serif r-otp-num"
+                      style={{
+                        fontSize: 'clamp(36px, 6vw, 60px)',
+                        fontWeight: 600,
+                        letterSpacing: '0.12em',
+                        color: 'var(--ink)',
+                        marginTop: 6,
+                        fontVariantNumeric: 'tabular-nums',
+                        wordBreak: 'break-all',
+                      }}
                     >
-                      {activeMessage.otpExtraction.otpCode}
-                    </p>
+                      {activeMessage.otpExtraction.otpCode.split('').join(' ')}
+                    </div>
                   </div>
                   <button
                     type="button"
-                    onClick={() => handleCopyOtp(activeMessage.otpExtraction!.otpCode!)}
-                    className="flex-shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-lg transition-all min-h-[44px] min-w-[44px]"
-                    style={{
-                      background: copiedOtp ? '#832800' : 'rgba(131,40,0,0.12)',
-                      color: copiedOtp ? '#ffffff' : '#832800',
-                      fontFamily: 'var(--font-manrope)',
-                      fontSize: '0.8125rem',
-                      fontWeight: 600,
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      handleCopyOtp(activeMessage.otpExtraction!.otpCode!)
                     }}
                     aria-label="Copy OTP code"
+                    style={{
+                      background: copiedOtp ? 'var(--jade)' : 'var(--cinnabar-3)',
+                      color: 'var(--rice)',
+                      padding: '12px 20px',
+                      borderRadius: 10,
+                      fontSize: 13,
+                      fontWeight: 500,
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: 8,
+                      transition: 'background 0.4s',
+                      position: 'relative',
+                      zIndex: 1,
+                      flexShrink: 0,
+                      minHeight: 44,
+                    }}
                   >
-                    <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>
-                      {copiedOtp ? 'check' : 'content_copy'}
-                    </span>
-                    <span className="hidden sm:inline">{copiedOtp ? 'Copied!' : 'Copy'}</span>
+                    {copiedOtp ? '✓ Copied' : '⧉ Copy'}
                   </button>
                 </div>
               )}
 
-              <div className="mb-10">
-                <h1
-                  className="text-2xl mb-6"
-                  style={{ fontFamily: 'var(--font-newsreader)', color: '#1c1c1a', fontWeight: 600 }}
+              <h1
+                className="serif"
+                style={{
+                  fontSize: 'clamp(24px, 4vw, 36px)',
+                  fontWeight: 500,
+                  margin: '36px 0 18px',
+                  letterSpacing: '-0.01em',
+                  color: 'var(--ink)',
+                }}
+              >
+                {activeMessage.subject}
+              </h1>
+
+              <div
+                className="r-msg-meta"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 14,
+                  marginBottom: 28,
+                  paddingBottom: 24,
+                  borderBottom: '1px solid var(--line)',
+                  flexWrap: 'wrap',
+                }}
+              >
+                <div
+                  style={{
+                    width: 40,
+                    height: 40,
+                    borderRadius: 8,
+                    background: 'var(--ink)',
+                    color: 'var(--rice)',
+                    display: 'grid',
+                    placeItems: 'center',
+                    fontFamily: 'var(--font-mono)',
+                    fontWeight: 600,
+                    fontSize: 14,
+                    flexShrink: 0,
+                  }}
                 >
-                  {activeMessage.subject}
-                </h1>
-                <div className="flex items-center justify-between flex-wrap gap-3">
-                  <div className="flex items-center gap-3">
-                    <div
-                      className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-xs flex-shrink-0"
-                      style={{ background: '#1c1c1a' }}
-                    >
-                      {getInitials(activeMessage.fromName ?? activeMessage.fromEmail)}
-                    </div>
-                    <div className="flex flex-col">
-                      <span className="text-sm font-semibold" style={{ color: '#1c1c1a', fontFamily: 'var(--font-manrope)' }}>
-                        {activeMessage.fromName ?? activeMessage.fromEmail}
-                      </span>
-                      <span className="text-[12px]" style={{ color: '#5f5e58', fontFamily: 'var(--font-manrope)' }}>
-                        {activeMessage.fromEmail}
-                      </span>
-                      <span className="text-[11px]" style={{ color: '#8b726a', fontFamily: 'var(--font-manrope)' }}>
-                        To: {activeMessage.toEmail}
-                      </span>
-                    </div>
+                  {(activeMessage.fromName ?? activeMessage.fromEmail).slice(0, 2).toUpperCase()}
+                </div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontWeight: 500, fontSize: 14, color: 'var(--ink)' }}>
+                    {activeMessage.fromName ?? activeMessage.fromEmail}
                   </div>
-                  <div
-                    className="text-[11px] px-2 py-1 rounded-md"
-                    style={{ fontFamily: 'var(--font-manrope)', color: '#5f5e58', background: '#f0edea' }}
-                  >
-                    {new Date(activeMessage.receivedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                    {' · '}
-                    {new Date(activeMessage.receivedAt).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}
+                  <div className="mono" style={{ fontSize: 11, color: 'var(--ink-3)' }}>
+                    {activeMessage.fromEmail}
                   </div>
+                  <div className="mono" style={{ fontSize: 11, color: 'var(--ink-3)' }}>
+                    To: {activeMessage.toEmail}
+                  </div>
+                </div>
+                <div
+                  className="mono"
+                  style={{
+                    fontSize: 11,
+                    color: 'var(--ink-3)',
+                    background: 'var(--rice)',
+                    padding: '6px 10px',
+                    borderRadius: 6,
+                  }}
+                >
+                  {new Date(activeMessage.receivedAt).toLocaleDateString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                    year: 'numeric',
+                  })}{' '}
+                  ·{' '}
+                  {new Date(activeMessage.receivedAt).toLocaleTimeString('en-US', {
+                    hour: 'numeric',
+                    minute: '2-digit',
+                    hour12: true,
+                  })}
                 </div>
               </div>
 
-              {activeMessage.bodyText?.trim() ? (
-                <div
-                  className="text-[14px] leading-[1.7] whitespace-pre-line break-words"
-                  style={{ color: '#1c1c1a', fontFamily: 'var(--font-manrope)' }}
-                >
-                  {activeMessage.bodyText}
-                </div>
-              ) : activeMessage.bodyHtml ? (
-                <div
-                  className="email-html-body w-full overflow-auto"
-                  style={{ background: '#fff', borderRadius: '8px' }}
-                  dangerouslySetInnerHTML={{ __html: activeMessage.bodyHtml }}
-                />
-              ) : (
-                <div
-                  className="text-[14px] leading-[1.7]"
-                  style={{ color: '#8b726a', fontFamily: 'var(--font-manrope)' }}
-                >
-                  (No content)
-                </div>
-              )}
+              {/* Body */}
+              <div
+                className="r-msg-body"
+                style={{
+                  background: 'var(--rice)',
+                  borderRadius: 16,
+                  padding: 32,
+                  border: '1px solid var(--line)',
+                  fontSize: 14,
+                  lineHeight: 1.6,
+                  color: 'var(--ink-2)',
+                }}
+              >
+                {activeMessage.bodyText?.trim() ? (
+                  <div style={{ whiteSpace: 'pre-line', wordBreak: 'break-word' }}>
+                    {activeMessage.bodyText}
+                  </div>
+                ) : activeMessage.bodyHtml ? (
+                  <div
+                    className="email-html-body w-full overflow-auto"
+                    dangerouslySetInnerHTML={{ __html: activeMessage.bodyHtml }}
+                  />
+                ) : (
+                  <div style={{ color: 'var(--ink-4)' }}>(No content)</div>
+                )}
+              </div>
             </div>
+          </div>
+
+          {/* Corner wolf */}
+          <div
+            className="r-corner-wolf hidden md:block"
+            style={{
+              position: 'fixed',
+              bottom: 16,
+              right: 24,
+              zIndex: 30,
+              pointerEvents: 'none',
+            }}
+          >
+            <WolfMascot size={120} />
           </div>
         </section>
       ) : (
-        <section className="flex-1 hidden md:flex md:flex-col items-center justify-center bg-surface-container-lowest">
-          <div className="text-center">
-            <div
-              className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4"
-              style={{ background: '#e5e2da' }}
-            >
-              <span className="material-symbols-outlined" style={{ fontSize: '28px', color: '#57423b' }}>inbox</span>
+        <section
+          className="r-inbox-detail flex-1 hidden md:flex md:flex-col items-center justify-center"
+          style={{ background: 'var(--paper)' }}
+        >
+          <div style={{ textAlign: 'center' }}>
+            <div className="cjk" style={{ fontSize: 80, color: 'var(--ink-5)', opacity: 0.4, marginBottom: 12 }}>
+              静
             </div>
-            <p className="text-sm font-medium mb-1" style={{ color: '#1c1c1a', fontFamily: 'var(--font-manrope)' }}>
-              Your inbox is empty
+            <p
+              className="mono"
+              style={{
+                fontSize: 11,
+                letterSpacing: '0.18em',
+                textTransform: 'uppercase',
+                color: 'var(--ink-3)',
+                marginBottom: 6,
+              }}
+            >
+              The dojo is quiet
             </p>
-            <p className="text-xs" style={{ color: '#5f5e58', fontFamily: 'var(--font-manrope)' }}>
-              Messages will appear here once email receiving is set up.
+            <p style={{ fontSize: 13, color: 'var(--ink-4)' }}>
+              Select a message — or wait for a new one to arrive.
             </p>
           </div>
         </section>

@@ -1,23 +1,43 @@
 import type { Metadata } from 'next'
-import { Newsreader, Manrope } from 'next/font/google'
+import { Fraunces, Noto_Serif_SC, Ma_Shan_Zheng, Geist, Geist_Mono } from 'next/font/google'
 import './globals.css'
 
-const newsreader = Newsreader({
+const fraunces = Fraunces({
   subsets: ['latin'],
-  variable: '--font-newsreader',
+  variable: '--font-fraunces',
   style: ['normal', 'italic'],
-  weight: ['400', '600'],
+  weight: ['300', '400', '500', '600', '700', '900'],
   display: 'swap',
 })
 
-const manrope = Manrope({
+const notoSerifSC = Noto_Serif_SC({
   subsets: ['latin'],
-  variable: '--font-manrope',
+  variable: '--font-noto-serif-sc',
+  weight: ['300', '400', '500', '700', '900'],
+  display: 'swap',
+})
+
+const maShanZheng = Ma_Shan_Zheng({
+  subsets: ['latin'],
+  variable: '--font-ma-shan-zheng',
+  weight: ['400'],
+  display: 'swap',
+})
+
+const geist = Geist({
+  subsets: ['latin'],
+  variable: '--font-geist',
+  display: 'swap',
+})
+
+const geistMono = Geist_Mono({
+  subsets: ['latin'],
+  variable: '--font-geist-mono',
   display: 'swap',
 })
 
 export const metadata: Metadata = {
-  title: 'MailSifu',
+  title: 'MailSifu — Codes, the moment they arrive',
   description: 'Your OTP Master — clean internal inbox for receiving and surfacing OTP emails',
   icons: {
     icon: '/favicon.svg',
@@ -26,7 +46,10 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${newsreader.variable} ${manrope.variable}`}>
+    <html
+      lang="en"
+      className={`${fraunces.variable} ${notoSerifSC.variable} ${maShanZheng.variable} ${geist.variable} ${geistMono.variable}`}
+    >
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />

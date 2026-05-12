@@ -58,9 +58,12 @@ export function SearchableSelect({ options, selectedValue, placeholder, onChange
         onClick={() => setOpen(!open)}
         className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-medium cursor-pointer focus:outline-none"
         style={{
-          background: '#f0edea',
-          color: selectedValue ? '#1c1c1a' : '#5f5e58',
-          fontFamily: 'var(--font-manrope)',
+          background: 'var(--rice)',
+          border: '1px solid var(--line)',
+          color: selectedValue ? 'var(--ink)' : 'var(--ink-3)',
+          fontFamily: 'var(--font-mono)',
+          fontSize: 11,
+          letterSpacing: '0.04em',
         }}
       >
         <span className="truncate max-w-[120px]">{selectedLabel ?? placeholder}</span>
@@ -68,7 +71,7 @@ export function SearchableSelect({ options, selectedValue, placeholder, onChange
           <span
             role="button"
             className="material-symbols-outlined flex-shrink-0 hover:opacity-70"
-            style={{ fontSize: '14px', color: '#5f5e58' }}
+            style={{ fontSize: '14px', color: 'var(--ink-3)' }}
             onClick={(e) => {
               e.stopPropagation()
               handleSelect(null)
@@ -87,7 +90,7 @@ export function SearchableSelect({ options, selectedValue, placeholder, onChange
         ) : (
           <span
             className="material-symbols-outlined flex-shrink-0"
-            style={{ fontSize: '14px', color: '#5f5e58' }}
+            style={{ fontSize: '14px', color: 'var(--ink-3)' }}
           >
             expand_more
           </span>
@@ -99,17 +102,16 @@ export function SearchableSelect({ options, selectedValue, placeholder, onChange
         <div
           className="absolute left-0 top-full mt-1 z-50 w-56 rounded-lg overflow-hidden"
           style={{
-            background: '#ffffff',
-            border: '0.5px solid rgba(222,192,183,0.3)',
-            boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
+            background: 'var(--rice)',
+            border: '1px solid var(--line-2)',
+            boxShadow: '0 12px 28px -16px rgba(0,0,0,0.3)',
           }}
         >
-          {/* Search input */}
-          <div className="p-2" style={{ borderBottom: '0.5px solid rgba(222,192,183,0.2)' }}>
+          <div className="p-2" style={{ borderBottom: '1px solid var(--line)' }}>
             <div className="relative">
               <span
                 className="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none"
-                style={{ fontSize: '14px', color: '#8b726a' }}
+                style={{ fontSize: '14px', color: 'var(--ink-4)' }}
               >
                 search
               </span>
@@ -120,26 +122,24 @@ export function SearchableSelect({ options, selectedValue, placeholder, onChange
                 onChange={(e) => setQuery(e.target.value)}
                 className="w-full py-2 pl-8 pr-3 rounded-md text-xs focus:outline-none"
                 style={{
-                  background: '#f0edea',
-                  color: '#1c1c1a',
-                  fontFamily: 'var(--font-manrope)',
-                  border: 'none',
+                  background: 'var(--paper)',
+                  color: 'var(--ink)',
+                  fontFamily: 'var(--font-mono)',
+                  border: '1px solid var(--line)',
                 }}
                 placeholder="Search…"
               />
             </div>
           </div>
 
-          {/* Options list */}
           <div className="max-h-48 overflow-y-auto p-1">
-            {/* "All" option */}
             <button
               type="button"
               onClick={() => handleSelect(null)}
-              className="w-full text-left px-3 py-2 rounded-md text-xs transition-colors hover:bg-[#f6f3f0]"
+              className="w-full text-left px-3 py-2 rounded-md text-xs transition-colors"
               style={{
-                fontFamily: 'var(--font-manrope)',
-                color: selectedValue === null ? '#832800' : '#5f5e58',
+                fontFamily: 'var(--font-mono)',
+                color: selectedValue === null ? 'var(--cinnabar-3)' : 'var(--ink-3)',
                 fontWeight: selectedValue === null ? 600 : 400,
               }}
             >
@@ -150,10 +150,10 @@ export function SearchableSelect({ options, selectedValue, placeholder, onChange
                 type="button"
                 key={opt.value}
                 onClick={() => handleSelect(opt.value)}
-                className="w-full text-left px-3 py-2 rounded-md text-xs transition-colors hover:bg-[#f6f3f0]"
+                className="w-full text-left px-3 py-2 rounded-md text-xs transition-colors"
                 style={{
-                  fontFamily: 'var(--font-manrope)',
-                  color: selectedValue === opt.value ? '#832800' : '#1c1c1a',
+                  fontFamily: 'var(--font-mono)',
+                  color: selectedValue === opt.value ? 'var(--cinnabar-3)' : 'var(--ink)',
                   fontWeight: selectedValue === opt.value ? 600 : 400,
                 }}
               >
@@ -163,7 +163,7 @@ export function SearchableSelect({ options, selectedValue, placeholder, onChange
             {filtered.length === 0 && (
               <p
                 className="px-3 py-2 text-xs"
-                style={{ color: '#8b726a', fontFamily: 'var(--font-manrope)' }}
+                style={{ color: 'var(--ink-4)', fontFamily: 'var(--font-mono)' }}
               >
                 No results
               </p>

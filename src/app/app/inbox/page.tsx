@@ -1,7 +1,6 @@
 import { after } from 'next/server'
 import { unstable_cache } from 'next/cache'
 import { prisma } from '@/lib/prisma'
-import { TopBar } from '@/components/TopBar'
 import { getSession, getMembership } from '@/lib/workspace'
 import { InboxView } from './InboxView'
 
@@ -34,7 +33,7 @@ export default async function InboxPage({
 }: {
   searchParams: Promise<{ id?: string; domain?: string; alias?: string }>
 }) {
-  const [session, membership, params] = await Promise.all([
+  const [, membership, params] = await Promise.all([
     getSession(),
     getMembership(),
     searchParams,
@@ -91,9 +90,6 @@ export default async function InboxPage({
     )
   }
 
-  const isAdmin = membership?.role === 'owner'
-  const userName = session?.user?.name ?? session?.user?.email ?? 'User'
-
   const serialize = (m: typeof messages[number]) => ({
     id: m.id,
     fromName: m.fromName,
@@ -114,12 +110,7 @@ export default async function InboxPage({
   const serializedActive = activeMessage ? serialize(activeMessage) : null
 
   return (
-    <main className="flex-1 flex flex-col overflow-hidden bg-surface">
-      <TopBar
-        breadcrumb={['Inbox']}
-        showSearch={false}
-        userName={userName}
-      />
+    <main className="flex-1 flex flex-col overflow-hidden" style={{ background: 'var(--paper)' }}>
       <InboxView
         messages={serializedMessages}
         activeMessage={serializedActive}

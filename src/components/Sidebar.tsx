@@ -1,13 +1,91 @@
 'use client'
+
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { signOut } from 'next-auth/react'
 import { useEffect, useState } from 'react'
+import { Logo } from './Logo'
+import { WolfMascot } from './WolfMascot'
 
 interface SidebarProps {
   userName: string
   userEmail: string
   isAdmin?: boolean
+}
+
+interface NavItemProps {
+  cjk: string
+  label: string
+  href: string
+  active: boolean
+  badge?: string
+  onClick?: () => void
+}
+
+function NavItem({ cjk, label, href, active, badge, onClick }: NavItemProps) {
+  return (
+    <Link
+      href={href}
+      onClick={onClick}
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: 12,
+        padding: '11px 14px',
+        borderRadius: 10,
+        background: active ? 'var(--rice)' : 'transparent',
+        boxShadow: active ? '0 4px 14px -10px rgba(0,0,0,0.3)' : 'none',
+        color: active ? 'var(--cinnabar-3)' : 'var(--ink-2)',
+        fontWeight: active ? 600 : 500,
+        fontSize: 14,
+        textAlign: 'left',
+        transition: 'all 0.3s var(--ease)',
+        position: 'relative',
+        textDecoration: 'none',
+      }}
+    >
+      <span
+        className="cjk"
+        style={{
+          fontSize: 16,
+          fontWeight: 700,
+          color: active ? 'var(--cinnabar)' : 'var(--ink-4)',
+        }}
+      >
+        {cjk}
+      </span>
+      <span style={{ flex: 1 }}>{label}</span>
+      {badge && (
+        <span
+          className="mono"
+          style={{
+            fontSize: 10,
+            fontWeight: 600,
+            background: 'var(--cinnabar)',
+            color: 'var(--rice)',
+            padding: '2px 8px',
+            borderRadius: 999,
+          }}
+        >
+          {badge}
+        </span>
+      )}
+      {active && (
+        <span
+          style={{
+            position: 'absolute',
+            left: 0,
+            top: '50%',
+            transform: 'translateY(-50%)',
+            width: 3,
+            height: '50%',
+            background: 'var(--cinnabar)',
+            borderRadius: 999,
+          }}
+        />
+      )}
+    </Link>
+  )
 }
 
 export function Sidebar({ userName, userEmail, isAdmin }: SidebarProps) {
@@ -32,170 +110,189 @@ export function Sidebar({ userName, userEmail, isAdmin }: SidebarProps) {
     .toUpperCase()
     .slice(0, 2)
 
+  const close = () => setIsOpen(false)
+
   return (
     <>
-      {/* Mobile backdrop */}
       {isOpen && (
         <div
           className="fixed inset-0 z-40 bg-black/30 lg:hidden"
-          onClick={() => setIsOpen(false)}
+          onClick={close}
         />
       )}
 
       <aside
         className={[
-          'w-64 flex flex-col py-8 px-4 flex-shrink-0 z-50',
-          'fixed inset-y-0 left-0 h-full transition-transform duration-300',
+          'flex flex-col flex-shrink-0 z-50',
+          'fixed inset-y-0 left-0 transition-transform duration-300',
           'lg:static lg:translate-x-0',
           isOpen ? 'translate-x-0' : '-translate-x-full',
         ].join(' ')}
-        style={{ background: '#FFF0E8' }}
+        style={{
+          width: 240,
+          background: 'linear-gradient(180deg, var(--cinnabar-soft) 0%, var(--paper) 50%)',
+          borderRight: '1px solid var(--line)',
+          padding: '24px 18px',
+          paddingBottom: 'max(24px, env(safe-area-inset-bottom))',
+          height: '100%',
+        }}
       >
-        {/* Mobile close button */}
+        {/* Mobile close */}
         <button
-          className="absolute top-4 right-4 lg:hidden p-2 rounded-lg hover:bg-[#fcf9f6]/50 transition-colors"
-          onClick={() => setIsOpen(false)}
+          className="absolute top-3 right-3 lg:hidden p-2 rounded-lg"
+          onClick={close}
+          style={{ color: 'var(--ink-3)' }}
           aria-label="Close menu"
         >
-          <span className="material-symbols-outlined" style={{ fontSize: '20px', color: '#5f5e58' }}>close</span>
+          <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>close</span>
         </button>
 
         {/* Brand */}
-        <div className="mb-10 px-4">
-          <span
-            style={{
-              fontFamily: 'var(--font-newsreader)',
-              fontStyle: 'italic',
-              fontSize: '1.5rem',
-              color: '#832800',
-              fontWeight: 600,
-              display: 'block',
-            }}
-          >
-            MailSifu
-          </span>
-          <p
-            style={{
-              fontFamily: 'var(--font-manrope)',
-              fontSize: '0.7rem',
-              color: '#5f5e58',
-              letterSpacing: '0.08em',
-              marginTop: '0.2rem',
-            }}
-          >
-            OTP Curator
-          </p>
+        <Link href="/app/inbox" onClick={close} style={{ alignSelf: 'flex-start', textDecoration: 'none' }}>
+          <Logo size={22} />
+        </Link>
+        <div
+          className="mono"
+          style={{
+            fontSize: 10,
+            color: 'var(--ink-3)',
+            letterSpacing: '0.16em',
+            textTransform: 'uppercase',
+            marginLeft: 32,
+            marginBottom: 28,
+            marginTop: 4,
+          }}
+        >
+          OTP curator · 收
         </div>
 
         {/* Nav */}
-        <nav className="flex-1 space-y-1">
-          <Link
-            href="/app/inbox"
-            onClick={() => setIsOpen(false)}
-            className="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors duration-200 min-h-[44px]"
-            style={{
-              fontFamily: 'var(--font-manrope)',
-              fontSize: '0.875rem',
-              fontWeight: activePage === 'inbox' ? 700 : 500,
-              color: activePage === 'inbox' ? '#832800' : '#5f5e58',
-              background: activePage === 'inbox' ? 'rgba(255,255,255,0.55)' : 'transparent',
-            }}
-          >
-            <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>inbox</span>
-            <span>Inbox</span>
-          </Link>
-
-          <Link
-            href="/app/domains"
-            onClick={() => setIsOpen(false)}
-            className="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors duration-200 min-h-[44px]"
-            style={{
-              fontFamily: 'var(--font-manrope)',
-              fontSize: '0.875rem',
-              fontWeight: activePage === 'domains' ? 700 : 500,
-              color: activePage === 'domains' ? '#832800' : '#5f5e58',
-              background: activePage === 'domains' ? 'rgba(255,255,255,0.55)' : 'transparent',
-            }}
-          >
-            <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>language</span>
-            <span>Domains</span>
-          </Link>
-
+        <nav style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+          <NavItem cjk="收" label="Inbox" href="/app/inbox" active={activePage === 'inbox'} onClick={close} />
+          <NavItem cjk="门" label="Domains" href="/app/domains" active={activePage === 'domains'} onClick={close} />
           {isAdmin && (
-            <Link
+            <NavItem
+              cjk="徒"
+              label="Disciples"
               href="/app/admin/users"
-              onClick={() => setIsOpen(false)}
-              className="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors duration-200 min-h-[44px]"
-              style={{
-                fontFamily: 'var(--font-manrope)',
-                fontSize: '0.875rem',
-                fontWeight: activePage === 'users' ? 700 : 500,
-                color: activePage === 'users' ? '#832800' : '#5f5e58',
-                background: activePage === 'users' ? 'rgba(255,255,255,0.55)' : 'transparent',
-              }}
-            >
-              <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>group</span>
-              <span>Users</span>
-            </Link>
+              active={activePage === 'users'}
+              onClick={close}
+            />
           )}
         </nav>
 
-        {/* Footer */}
+        {/* Mini wolf widget */}
         <div
-          className="mt-auto space-y-4 px-2"
-          style={{ paddingBottom: 'max(1rem, env(safe-area-inset-bottom))' }}
+          style={{
+            marginTop: 24,
+            padding: 12,
+            background: 'rgba(250,244,228,0.5)',
+            borderRadius: 14,
+            textAlign: 'center',
+            border: '1px dashed var(--line-2)',
+          }}
         >
-          <Link
-            href="/app/domains"
-            onClick={() => setIsOpen(false)}
-            className="w-full premium-gradient text-white py-3 rounded-lg font-medium flex items-center justify-center gap-2 transition-all active:opacity-80 active:scale-[0.99] min-h-[44px]"
-            style={{ fontFamily: 'var(--font-manrope)', fontSize: '0.875rem', textDecoration: 'none' }}
-          >
-            <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>add</span>
-            New Domain
-          </Link>
-
+          <WolfMascot size={100} />
           <div
-            className="pt-4"
-            style={{ borderTop: '0.5px solid rgba(222,192,183,0.2)' }}
+            className="mono"
+            style={{
+              fontSize: 10,
+              color: 'var(--ink-3)',
+              letterSpacing: '0.1em',
+              textTransform: 'uppercase',
+              marginTop: 4,
+            }}
           >
-            {/* User */}
-            <div
-              className="flex items-center gap-3 px-4 py-2 rounded-lg mb-1"
-              style={{ background: 'rgba(252,249,246,0.4)' }}
-            >
-              <div
-                className="w-9 h-9 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0"
-                style={{ background: 'linear-gradient(135deg, #832800 0%, #a43e15 100%)' }}
-              >
-                {initials}
-              </div>
-              <div className="flex flex-col min-w-0">
-                <span
-                  className="truncate leading-none mb-0.5"
-                  style={{ fontFamily: 'var(--font-manrope)', fontSize: '0.75rem', fontWeight: 600, color: '#1c1c1a' }}
-                >
-                  {userName}
-                </span>
-                <span
-                  className="truncate"
-                  style={{ fontFamily: 'var(--font-manrope)', fontSize: '0.65rem', color: '#57423b' }}
-                >
-                  {userEmail}
-                </span>
-              </div>
-            </div>
-
-            <button
-              onClick={() => signOut({ callbackUrl: '/auth/signin' })}
-              className="w-full flex items-center gap-3 px-4 py-3 transition-colors duration-200 rounded-lg hover:bg-[#fcf9f6]/50 min-h-[44px]"
-              style={{ fontFamily: 'var(--font-manrope)', fontSize: '0.875rem', color: '#5f5e58' }}
-            >
-              <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>logout</span>
-              <span>Sign out</span>
-            </button>
+            Lang · on duty
           </div>
         </div>
+
+        <div style={{ flex: 1 }} />
+
+        {/* New domain CTA */}
+        <Link
+          href="/app/domains"
+          onClick={close}
+          style={{
+            background: 'var(--cinnabar)',
+            color: 'var(--rice)',
+            padding: 12,
+            borderRadius: 12,
+            fontSize: 13,
+            fontWeight: 500,
+            marginBottom: 12,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 8,
+            textDecoration: 'none',
+            transition: 'background 0.3s var(--ease)',
+          }}
+        >
+          + New domain
+        </Link>
+
+        {/* User chip */}
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 10,
+            padding: '10px 8px',
+            borderRadius: 10,
+            background: 'rgba(250,244,228,0.5)',
+          }}
+        >
+          <div
+            style={{
+              width: 32,
+              height: 32,
+              borderRadius: 999,
+              background: 'var(--cinnabar)',
+              color: 'var(--rice)',
+              display: 'grid',
+              placeItems: 'center',
+              fontWeight: 600,
+              fontSize: 13,
+              flexShrink: 0,
+            }}
+          >
+            {initials || 'U'}
+          </div>
+          <div style={{ minWidth: 0, flex: 1 }}>
+            <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--ink)' }}>{userName}</div>
+            <div
+              className="mono"
+              style={{
+                fontSize: 10,
+                color: 'var(--ink-3)',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              {userEmail || (isAdmin ? 'sifu · admin' : 'disciple')}
+            </div>
+          </div>
+        </div>
+
+        <button
+          onClick={() => signOut({ callbackUrl: '/auth/signin' })}
+          style={{
+            marginTop: 8,
+            padding: '10px 8px',
+            fontSize: 12,
+            color: 'var(--ink-3)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 8,
+            borderRadius: 10,
+            transition: 'background 0.3s',
+          }}
+        >
+          <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>logout</span>
+          Sign out
+        </button>
       </aside>
     </>
   )

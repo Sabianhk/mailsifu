@@ -12,7 +12,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   return (
     <SessionProvider session={session}>
-      <div className="flex h-screen overflow-hidden" style={{ background: '#fdf8f5' }}>
+      <div className="flex h-screen overflow-hidden" style={{ background: 'var(--paper)' }}>
         <Sidebar userName={userName} userEmail={session?.user?.email ?? ''} isAdmin={isAdmin} />
         {children}
       </div>

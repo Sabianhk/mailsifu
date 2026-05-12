@@ -1,138 +1,138 @@
 @import "tailwindcss";
 
+/* ============================================================
+   MailSifu v2 — Ancient Sifu × Mini Wolf × 2026
+   Rice paper × cinnabar × ink
+   ============================================================ */
+
 @theme {
-  /* === Stitch Design System === */
-  --color-primary: #832800;
-  --color-primary-container: #a43e15;
-  --color-on-primary: #ffffff;
-  --color-on-primary-container: #ffcfbf;
-  --color-primary-fixed: #ffdbcf;
-  --color-primary-fixed-dim: #ffb59c;
-  --color-inverse-primary: #ffb59c;
-
-  --color-secondary: #5f5e58;
-  --color-secondary-container: #e5e2da;
-  --color-on-secondary: #ffffff;
-  --color-on-secondary-container: #66645e;
-
-  --color-tertiary: #524536;
-  --color-tertiary-container: #6b5c4d;
-  --color-tertiary-fixed: #f4dfcb;
-  --color-on-tertiary: #ffffff;
-  --color-on-tertiary-fixed: #241a0e;
-
-  --color-surface: #fcf9f6;
-  --color-surface-dim: #dcdad7;
-  --color-surface-bright: #fcf9f6;
-  --color-surface-tint: #a33d14;
-  --color-surface-variant: #e5e2df;
-  --color-surface-container: #f0edea;
-  --color-surface-container-low: #f6f3f0;
-  --color-surface-container-lowest: #ffffff;
-  --color-surface-container-high: #eae8e5;
-  --color-surface-container-highest: #e5e2df;
-
-  --color-background: #fcf9f6;
-  --color-on-background: #1c1c1a;
-  --color-on-surface: #1c1c1a;
-  --color-on-surface-variant: #57423b;
-  --color-inverse-surface: #31302f;
-  --color-inverse-on-surface: #f3f0ed;
-
-  --color-outline: #8b726a;
-  --color-outline-variant: #dec0b7;
-
-  --color-error: #ba1a1a;
-  --color-error-container: #ffdad6;
-  --color-on-error: #ffffff;
-  --color-on-error-container: #93000a;
+  /* Palette tokens (Tailwind-accessible) */
+  --color-paper: #f2e9d4;
+  --color-paper-2: #ece0c4;
+  --color-paper-3: #e4d4b0;
+  --color-rice: #faf4e4;
+  --color-ink: #1a1410;
+  --color-ink-2: #2e2419;
+  --color-ink-3: #5a4a38;
+  --color-ink-4: #8a7860;
+  --color-ink-5: #b5a488;
+  --color-cinnabar: #c8392b;
+  --color-cinnabar-2: #a82a1f;
+  --color-cinnabar-3: #8a1f17;
+  --color-cinnabar-soft: #ebb9ae;
+  --color-gold: #c9a45e;
+  --color-gold-2: #b08840;
+  --color-jade: #5a8a6f;
+  --color-jade-2: #3f6b53;
 
   /* Fonts */
-  --font-headline: var(--font-newsreader), "Newsreader", serif;
-  --font-body: var(--font-manrope), "Manrope", sans-serif;
-  --font-label: var(--font-manrope), "Manrope", sans-serif;
+  --font-display: var(--font-fraunces), "Fraunces", "Noto Serif SC", serif;
+  --font-cjk: var(--font-noto-serif-sc), "Noto Serif SC", "Songti SC", serif;
+  --font-brush: var(--font-ma-shan-zheng), "Ma Shan Zheng", cursive;
+  --font-sans: var(--font-geist), "Geist", system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), "Geist Mono", ui-monospace, monospace;
 }
 
-* {
-  box-sizing: border-box;
+:root {
+  /* Raw CSS variables for direct access in inline styles */
+  --paper: #f2e9d4;
+  --paper-2: #ece0c4;
+  --paper-3: #e4d4b0;
+  --rice: #faf4e4;
+  --ink: #1a1410;
+  --ink-2: #2e2419;
+  --ink-3: #5a4a38;
+  --ink-4: #8a7860;
+  --ink-5: #b5a488;
+  --line: rgba(26, 20, 16, 0.10);
+  --line-2: rgba(26, 20, 16, 0.18);
+
+  --cinnabar: #c8392b;
+  --cinnabar-2: #a82a1f;
+  --cinnabar-3: #8a1f17;
+  --cinnabar-soft: #ebb9ae;
+  --gold: #c9a45e;
+  --gold-2: #b08840;
+  --jade: #5a8a6f;
+  --jade-2: #3f6b53;
+  --shadow: rgba(26, 20, 16, 0.20);
+
+  --ease: cubic-bezier(0.19, 1, 0.22, 1);
+  --ease-q: cubic-bezier(0.76, 0, 0.24, 1);
+  --ease-s: cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-html, body {
-  height: 100%;
-}
-
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; height: 100%; }
 body {
-  font-family: var(--font-body);
-  background-color: var(--color-background);
-  color: var(--color-on-surface);
+  font-family: var(--font-sans);
+  background: var(--paper);
+  color: var(--ink);
   -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+  font-feature-settings: "ss01", "cv01";
 }
+
+/* Rice-paper grain */
+body::before {
+  content: "";
+  position: fixed; inset: 0;
+  pointer-events: none;
+  z-index: 998;
+  opacity: 0.45;
+  mix-blend-mode: multiply;
+  background-image:
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.10  0 0 0 0 0.08  0 0 0 0 0.06  0 0 0 0.07 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+}
+
+/* Bamboo fiber lines */
+body::after {
+  content: "";
+  position: fixed; inset: 0;
+  pointer-events: none;
+  z-index: 997;
+  opacity: 0.05;
+  background-image:
+    repeating-linear-gradient(90deg, transparent 0 39px, var(--ink) 39px 40px),
+    repeating-linear-gradient(0deg, transparent 0 60px, var(--ink) 60px 61px);
+}
+
+/* Typography helpers (class-based, used widely in TSX) */
+.serif        { font-family: var(--font-display); font-optical-sizing: auto; }
+.serif-it     { font-family: var(--font-display); font-style: italic; font-optical-sizing: auto; }
+.cjk          { font-family: var(--font-cjk); }
+.brush        { font-family: var(--font-brush); }
+.mono         { font-family: var(--font-mono); }
+.eyebrow      { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-3); }
 
 .material-symbols-outlined {
   font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
 }
 
-.premium-gradient {
-  background: linear-gradient(135deg, #832800 0%, #a43e15 100%);
+button {
+  font-family: inherit; cursor: pointer; border: none;
+  background: none; color: inherit; padding: 0;
 }
+input, textarea, select { font-family: inherit; }
 
-.glass-panel {
-  background: rgba(255, 255, 255, 0.88);
-  backdrop-filter: blur(16px);
-}
-
-.soft-elevation {
-  box-shadow: 0 20px 50px rgba(28, 28, 26, 0.04);
-}
-
-.ghost-border {
-  outline: 0.5px solid rgba(222, 192, 183, 0.2);
-}
-
-/* Aurora blob animations — slow, organic, warm */
-@keyframes aurora-drift-1 {
-  0%   { transform: translate(0%, 0%) scale(1) rotate(0deg); }
-  25%  { transform: translate(15%, -20%) scale(1.15) rotate(45deg); }
-  50%  { transform: translate(-10%, 15%) scale(0.9) rotate(90deg); }
-  75%  { transform: translate(20%, -5%) scale(1.1) rotate(135deg); }
-  100% { transform: translate(0%, 0%) scale(1) rotate(180deg); }
-}
-@keyframes aurora-drift-2 {
-  0%   { transform: translate(0%, 0%) scale(1) rotate(0deg); }
-  25%  { transform: translate(-20%, 15%) scale(1.1) rotate(-60deg); }
-  50%  { transform: translate(15%, -20%) scale(0.85) rotate(-120deg); }
-  75%  { transform: translate(-5%, 10%) scale(1.2) rotate(-180deg); }
-  100% { transform: translate(0%, 0%) scale(1) rotate(-240deg); }
-}
-@keyframes aurora-drift-3 {
-  0%   { transform: translate(0%, 0%) scale(1); }
-  33%  { transform: translate(10%, 15%) scale(1.08); }
-  66%  { transform: translate(-15%, -10%) scale(0.92); }
-  100% { transform: translate(0%, 0%) scale(1); }
-}
-
-/* Subtle grain texture overlay */
-@keyframes grain-shift {
-  0%, 100% { transform: translate(0, 0); }
-  10% { transform: translate(-2%, -3%); }
-  30% { transform: translate(3%, -1%); }
-  50% { transform: translate(-1%, 2%); }
-  70% { transform: translate(2%, 1%); }
-  90% { transform: translate(-3%, -2%); }
-}
-
-/* Soft shimmer sweep for the CTA */
-@keyframes shimmer-sweep {
-  0%   { transform: translateX(-100%) skewX(-15deg); }
-  100% { transform: translateX(200%) skewX(-15deg); }
-}
-
-/* Gentle pulse for the mockup glow */
-@keyframes glow-breathe {
-  0%, 100% { opacity: 0.5; transform: scale(1); }
-  50%      { opacity: 0.8; transform: scale(1.03); }
-}
-
-::-webkit-scrollbar { width: 4px; height: 4px; }
+::selection { background: var(--cinnabar); color: var(--rice); }
+::-webkit-scrollbar { width: 10px; height: 10px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #dec0b7; border-radius: 10px; }
+::-webkit-scrollbar-thumb { background: var(--line-2); border-radius: 999px; }
+::-webkit-scrollbar-thumb:hover { background: var(--ink-4); }
+
+/* Email body adjustments — keep readable on rice paper */
+.email-html-body { color: var(--ink-2); }
+.email-html-body a { color: var(--cinnabar-3); }
+
+/* Keyframes — visual animations from the redesign */
+@keyframes spin       { to { transform: rotate(360deg); } }
+@keyframes spinR      { to { transform: rotate(-360deg); } }
+@keyframes pulseDot   { 0%,100% { opacity:1; transform:scale(1); } 50% { opacity:.3; transform:scale(1.4); } }
+@keyframes bob        { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+@keyframes breathe    { 0%,100% { transform: scale(1); } 50% { transform: scale(1.015); } }
+@keyframes seal       { 0% { transform: scale(0) rotate(-30deg); opacity: 0; } 60% { transform: scale(1.15) rotate(-8deg); opacity: 1; } 100% { transform: scale(1) rotate(-8deg); opacity: 1; } }
+@keyframes wag        { 0%,100% { transform: rotate(-8deg); } 50% { transform: rotate(14deg); } }
+@keyframes earTwitch  { 0%,90%,100% { transform: rotate(0); } 95% { transform: rotate(-12deg); } }
+@keyframes rowIn      { from { opacity: 0; transform: translateX(-12px); } to { opacity: 1; transform: none; } }
+@keyframes copyBurst  { 0%,100% { transform: scale(1); } 50% { transform: scale(1.04); } }
